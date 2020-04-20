@@ -1,5 +1,5 @@
 # 15-418 Parallel Computer Architecture and Programming Final Project
-15418 Spring 2020 Project: Exploring Applications of Parallel Breadth-First Search in Randomized Graph Algorithms
+15418 Spring 2020 Project: Exploring Applications of Parallel Breadth-First Search in Randomized Graph Algorithms  
 By: Andrew Gu and Patrick Liu
 
 ## Summary
