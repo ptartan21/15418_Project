@@ -34,10 +34,11 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
         // Update present
         // Recompute isoperimetric_num by dividing
         if (degree_sum > 0) {
-            isoperimetric_num = next_boundary_size / degree_sum;
+            isoperimetric_num = ((float) next_boundary_size) / ((float) degree_sum);
         } else {
             isoperimetric_num = 0;
         }
+        fprintf(stderr, "isoperimetric number: %f\n", isoperimetric_num);
         
         for (const auto &vid : next_boundary_vertices) {
             present[vid] = NOT_PRESENT;
