@@ -5,13 +5,14 @@ typedef struct {
     int n; // number of vertices
     int m; // number of edges
 
-    int *vertex_offsets;
-    // Consider vertex i. Let offset_i = vertex_offsets[i], and let 
-    // offset_{i+1} = vertex_offsets[i+1]
-    // edge_list[offset_i], edge_list[offset_i+1], ..., edge_list[offset_{i+1}-1]
-    // are the out neighbors of vertex i
-    int *edge_list;
+    // Add dummy element (at the end) mapping n to m
+    // This allows for offsets[nid] to offsets[nid+1] indexing without out-of-bounds
+    int *out_offsets;
+    int *out_edge_list;
 
-} graph_t;
+    int *in_offsets;
+    int *in_edge_list;
+
+} graph_t, *Graph;
 
 #endif
