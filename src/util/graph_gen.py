@@ -1,4 +1,5 @@
 import networkx as nx
+import matplotlib.pyplot as plt
 import sys
 
 def export_graph(G, filename):
@@ -21,7 +22,9 @@ def export_graph(G, filename):
 # with probability p.
 def export_erdos_renyi_graph(n, p, directed=False):
     G = nx.erdos_renyi_graph(n, p, directed)
-    export_graph(G, "erdos_renyi_%d_%s.txt" % (n, p))
+    gname = "erdos_renyi_%d_%s" % (n, p)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
 
 # Generates random G_{n,m}.
 #     n - number of vertices
@@ -31,7 +34,9 @@ def export_erdos_renyi_graph(n, p, directed=False):
 # m edges.
 def export_random_graph(n, m, directed=False):
     G = nx.gnm_random_graph(n, m, directed)
-    export_graph(G, "graph_%d_%s.txt" % (n, m))
+    gname = "random_graph_%d_%s" % (n, m)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
 
 # Generates random undirected graph with power law degree distribution and
 # approximate average clustering.
@@ -40,16 +45,27 @@ def export_random_graph(n, m, directed=False):
 #     p - probability of adding a triangle after adding a random edge
 def export_power_law_graph(n, m, p):
     G = nx.powerlaw_cluster_graph(n, m, p)
-    export_graph(G, "powerlaw_%d_%s.txt" % (n, m))
+    gname = "powerlaw_%d_%s" % (n, m) 
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png" 
 
-if __name__ == "__main__":")
+def export_complete_graph(n):
+    G = nx.complete_graph(n)
+    m = (n * (n - 1) // 2) 
+    gname = "complete_%d_%s" % (n, m)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
+def mapping(x):
+    return x
+
+if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
         m = int(sys.argv[2])
-        export_random_graph(n, m, True)
-    # if (len(sys.argv) == 3):
-    #     n = int(sys.argv[1])
-    #     p = float(sys.argv[2])
-    #     export_erdos_renyi_graph(n, p)
+        G, gname = export_power_law_graph(n, m, 0.3)
+        nx.draw(G, with_labels = True)
+        plt.savefig(gname)
+        plt.show()
     else:
         print("Usage: python3 graph_gen.py [n] [p]")
