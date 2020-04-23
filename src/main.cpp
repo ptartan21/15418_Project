@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
             in_mapper[v].push_back(cur);
         }
     }
+    g->out_offsets[n] = m;
 
     // populating the in-neighbor portion of the graph
     g->in_offsets   = (int *) calloc(n + 1, sizeof(int));
@@ -85,5 +86,11 @@ int main(int argc, char **argv) {
     std::cout << "Sequential Ball Growing" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_seq(g, 0.75, collection, radii);
+    ball_decomp_seq(g, 0.25, collection, radii);
+    for (int i = 0; i < radii.size(); ++i) {
+        for (auto &vid : collection[i]) {
+            std::cout << vid << " ";
+        }
+        std::cout << "\nRadius: " << radii[i] << "\n\n";
+    }
 }

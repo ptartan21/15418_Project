@@ -20,11 +20,11 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
         for (const auto &vid : boundary_vertices) {
             for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
                 int nid = g->out_edge_list[eid];
-                if (!present[nid]) {
+                // Ignore if the vertex has already been viisted (no longer present in graph)
+                if (present[nid] == NOT_PRESENT) {
                     continue;
                 }
-                // Unvisited
-                if (next_boundary_vertices.find(nid) != next_boundary_vertices.end()) {
+                if (next_boundary_vertices.find(nid) == next_boundary_vertices.end()) {
                     next_boundary_vertices.insert(nid);
                     degree_sum += g->out_offsets[nid+1] - g->out_offsets[nid];
                 }
@@ -33,7 +33,12 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
         }
         // Update present
         // Recompute isoperimetric_num by dividing
-        isoperimetric_num = next_boundary_size / degree_sum;
+        if (degree_sum > 0) {
+            isoperimetric_num = next_boundary_size / degree_sum;
+        } else {
+            isoperimetric_num = 0;
+        }
+        
         for (const auto &vid : next_boundary_vertices) {
             present[vid] = NOT_PRESENT;
             ball.insert(vid);
@@ -42,7 +47,7 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
         next_boundary_vertices.clear();
         r++;
     }
-    R = r;
+    R = r-1;
 }
 
 
