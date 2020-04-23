@@ -111,3 +111,56 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
     free(frontier);
     free(next_frontier);
 }
+
+/*
+ * (PARALLEL)
+ * Constructs the next frontier using a bottom-up approach.
+ *     g - graph
+ *     frontier_size - number of vertices in the frontier
+ *     iter - current iteration; distance of vertices added to frontier from source
+ *     distances - distances from source
+ */
+ void inline construct_frontier_bottom_up_par(Graph g, int *frontier_size,
+    int iter, int *distances) {
+    int shared_frontier_size = 0;
+    #pragma omp parallel
+    {
+        // Iterate over vertices
+        #pragma omp for reduction(+:shared_frontier_size) schedule(static)
+        for (int vid = 0; vid < g->n; ++vid) {
+            if (is_unvisited(vid, distances)) {
+                for (int eid = g->in_offsets[vid]; eid < g->in_offsets[vid+1]; ++eid) {
+                    int nid = g->in_edge_list[eid];
+                    if (distances[nid] == iter-1) {
+                        distances[vid] = iter;
+                        shared_frontier_size++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    *frontier_size = shared_frontier_size;
+}
+
+/*
+ * (PARALLEL)
+ * Bottom-up BFS.
+ *     g - graph
+ *     source - starting point for the BFS
+ *     distances - output; distances from source
+ */
+void bfs_bottom_up_par(Graph g, int source, int *distances) {
+    int iter = 1;
+    int *frontier_size = (int *) calloc(1, sizeof(int));
+    for (int vid = 0; vid < g->n; ++vid) {
+        mark_unvisited(vid, distances);
+    }
+    *frontier_size = 1;
+    distances[source] = 0;
+    while (*frontier_size > 0) {
+        construct_frontier_bottom_up_par(g, frontier_size, iter, distances);
+        iter++;
+    }
+    free(frontier_size);
+}
