@@ -8,6 +8,7 @@
 
 #include "util/graph.h"
 #include "bfs/bfs_seq.cpp"
+#include "bfs/bfs_par.cpp"
 
 /*
  * Populate g
@@ -74,7 +75,7 @@ int main(int argc, char **argv) {
       for (int i = 0; i < n; ++i) {
           distances[i] = 0;
       }
-      bfs_bottom_up_seq(g, 0, distances);
+      bfs_bottom_up_par(g, 0, distances);
       for (int i = 0; i < n; ++i) {
           std::cout << distances[i] << " ";
       }

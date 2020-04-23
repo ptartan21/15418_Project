@@ -15,4 +15,9 @@ typedef struct {
 
 } graph_t, *Graph;
 
+struct vertex_set {
+    int num_vertices;
+    int *vertices;
+};
+
 #endif
