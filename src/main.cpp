@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <iomanip>
 
 #include "util/graph.h"
 #include "bfs/bfs_seq.cpp"
@@ -14,20 +15,14 @@
 /*
  * Populate g
  */
-void inline load_graph(std::string source, Graph g) {
-
-}
-
-int main(int argc, char **argv) {
+void inline load_graph(std::string graph_in, Graph &g) {
     int n, m;
-    Graph g = (graph_t *) malloc(sizeof(graph_t));
-    std::string graph_in(argv[1]);
-    std::string line;
     std::ifstream source;
     source.open(graph_in);
-    // retrieving the number of vertices and the number of edges
+    std::string line;
     std::getline(source, line);
     std::istringstream iss(line);
+    // retrieving the number of vertices and the number of edges
     iss >> n >> m;
     std::vector<std::vector<int>> in_mapper(n + 1, std::vector<int>{});
     // populating the out-neighbor portion of the graph
@@ -67,30 +62,55 @@ int main(int argc, char **argv) {
     source.close();
     std::cout << "Succesfully Loaded Graph" << std::endl;
 
+}
+
+void inline bfs_top_down_seq_wrapper(Graph &g) {
+    int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
-    bfs_top_down_seq(g, 0, distances);
-    for (int i = 0; i < n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << "\n\n";
 
-    for (int i = 0; i < n; ++i) {
-        distances[i] = 0;
-    }
-    bfs_bottom_up_par(g, 0, distances);
-    for (int i = 0; i < n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << std::endl;
+    free(distances);
+}
 
-    std::cout << "Sequential Ball Growing" << std::endl;
+void inline bfs_top_down_par_wrapper(Graph &g) {
+    int n = g->n;
+    int *distances = (int *) calloc(n, sizeof(int));
+
+    free(distances);
+}
+
+void inline bfs_bottom_up_seq_wrapper(Graph &g) {
+    int n = g->n;
+    int *distances = (int *) calloc(n, sizeof(int));
+
+    free(distances);
+}
+
+void inline bfs_bottom_up_par_wrapper(Graph &g) {
+    int n = g->n;
+    int *distances = (int *) calloc(n, sizeof(int));
+
+    free(distances);
+}
+
+void inline ball_decomp_seq_wrapper(Graph g, float beta) {
+    std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Sequential)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_seq(g, 0.25, collection, radii);
+    ball_decomp_seq(g, beta, collection, radii);
     for (int i = 0; i < radii.size(); ++i) {
         for (auto &vid : collection[i]) {
             std::cout << vid << " ";
         }
         std::cout << "\nRadius: " << radii[i] << "\n\n";
     }
+}
+
+int main(int argc, char **argv) {
+    std::string graph_in(argv[1]);
+    Graph g = (graph_t *) malloc(sizeof(graph_t));
+    load_graph(graph_in, g);
+
+    ball_decomp_seq_wrapper(g, 0.25);
+
+    free(g);
 }
