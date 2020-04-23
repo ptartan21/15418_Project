@@ -54,10 +54,7 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
     vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
     init_vertex_set(frontier, g->n);
     init_vertex_set(next_frontier, g->n);
-    #pragma omp parallel for schedule(static)
-    for (int vid = 0; vid < g->n; ++vid) {
-        mark_unvisited(vid, distances);
-    }
+    memset(distances, UNVISITED, g->n*sizeof(int));
     frontier->vertices[frontier->num_vertices++] = source;
     distances[source] = 0;
     // Main loop

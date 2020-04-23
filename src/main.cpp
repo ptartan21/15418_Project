@@ -10,7 +10,7 @@
 #include "util/graph.h"
 #include "bfs/bfs_seq.cpp"
 #include "bfs/bfs_par.cpp"
-#include "ball_growing/ball_growing.cpp"
+#include "ball_growing/ball_growing_seq.cpp"
 
 /*
  * Populate g
@@ -74,7 +74,11 @@ void inline bfs_top_down_seq_wrapper(Graph &g) {
 void inline bfs_top_down_par_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
-
+    bfs_top_down_par(g, 0, distances);
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
@@ -110,7 +114,8 @@ int main(int argc, char **argv) {
     Graph g = (graph_t *) malloc(sizeof(graph_t));
     load_graph(graph_in, g);
 
-    ball_decomp_seq_wrapper(g, 0.25);
+    // ball_decomp_seq_wrapper(g, 0.25);
+    bfs_top_down_par_wrapper(g);
 
     free(g);
 }
