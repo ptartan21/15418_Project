@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     std::cout << std::endl;
 
     std::cout << "Sequential Ball Growing" << std::endl;
-    vector<unordered_set<int>> collection;
-    vector<int> radii;
+    std::vector<std::unordered_set<int>> collection;
+    std::vector<int> radii;
     ball_decomp_seq(g, 0.75, collection, radii);
 }

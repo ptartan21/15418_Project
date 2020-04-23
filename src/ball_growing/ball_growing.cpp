@@ -6,11 +6,11 @@
 #define PRESENT 1
 #define NOT_PRESENT 0
 
-void grow_ball(Graph g, int source, float beta, vector<bool> &present, unordered_set<int> &ball, int &R) {
+void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std::unordered_set<int> &ball, int &R) {
     int r = 1;
     float isoperimetric_num = (float) g->m; // max possible
-    unordered_set<int> boundary_vertices;
-    unordered_set<int> next_boundary_vertices;
+    std::unordered_set<int> boundary_vertices;
+    std::unordered_set<int> next_boundary_vertices;
     boundary_vertices.insert(source);
     int degree_sum = g->out_offsets[source+1] - g->out_offsets[source];
     ball.clear();
@@ -39,7 +39,7 @@ void grow_ball(Graph g, int source, float beta, vector<bool> &present, unordered
             ball.insert(vid);
         }
         boundary_vertices.swap(next_boundary_vertices);
-        next_boundary_vertices.clear()
+        next_boundary_vertices.clear();
         r++;
     }
     R = r;
@@ -47,14 +47,14 @@ void grow_ball(Graph g, int source, float beta, vector<bool> &present, unordered
 
 
 
-void ball_decomp_seq(Graph g, float beta, vector<unordered_set<int>> &collection, vector<int> &radii) {
+void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &collection, std::vector<int> &radii) {
     //
-    vector<bool> present(g->n, PRESENT);
-    unordered_set<int> ball;
+    std::vector<bool> present(g->n, PRESENT);
+    std::unordered_set<int> ball;
     for (int vid = 0; vid < g->n; ++vid) {
         int R;
         if (present[vid] == PRESENT) {
-          grow_ball(g, x, beta, present, ball, R);
+          grow_ball(g, vid, beta, present, ball, R);
           collection.push_back(ball);
           radii.push_back(R);
           ball.clear();
