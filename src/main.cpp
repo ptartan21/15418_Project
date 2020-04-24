@@ -139,9 +139,9 @@ int main(int argc, char **argv) {
 
     omp_set_num_threads(8);
 
-    ball_decomp_seq_wrapper(g, 0.25);
-    ball_decomp_bottom_up_par_wrapper(g, 0.25);
-    ball_decomp_top_down_par_wrapper(g, 0.25);
+    ball_decomp_seq_wrapper(g, 0.5);
+    ball_decomp_bottom_up_par_wrapper(g, 0.5);
+    ball_decomp_top_down_par_wrapper(g, 0.5);
     // bfs_bottom_up_seq_wrapper(g);
     // bfs_bottom_up_par_wrapper(g);
     // bfs_top_down_seq_wrapper(g);

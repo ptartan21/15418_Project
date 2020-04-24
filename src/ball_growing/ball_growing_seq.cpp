@@ -7,6 +7,35 @@
 #define PRESENT 1
 #define NOT_PRESENT 0
 
+double get_avg_isoperimetric_num(Graph &g, std::vector<std::unordered_set<int>> &collection) {
+    double total_isoperimetric_num = 0.0;
+    int num_balls = collection.size();
+    for (auto &ball : collection) {
+        int degree_sum = 0;
+        int boundary_size = 0;
+        for (auto &vid : ball) {
+            degree_sum += g->out_offsets[vid+1] - g->out_offsets[vid];
+            // Iterate over neighbors to count boundary size
+            for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
+                int nid = g->out_edge_list[eid];
+                // Edge spanning this ball and other ball
+                if (ball.find(nid) == ball.end()) {
+                    boundary_size++;
+                }
+            }
+        }
+        double isoperimetric_num;
+        if (degree_sum == 0) {
+            isoperimetric_num = 0;
+        } else {
+            isoperimetric_num = ((double) boundary_size) / ((double) degree_sum);
+        }
+        // std::cout << "Isoperimetric Number of Ball " << isoperimetric_num << std::endl;
+        total_isoperimetric_num += isoperimetric_num;
+    }
+    return total_isoperimetric_num / ((double) num_balls);
+}
+
 /*
  * Grows a ball from the given source until its isoperimetric number is at 
  * most beta.
@@ -101,4 +130,6 @@ void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << "Num Balls: " << collection.size() << std::endl;
+    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, collection) << std::endl;
 }

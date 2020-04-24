@@ -9,10 +9,48 @@
 #define NOT_OWNED (-1)
 
 /*
- *
+ *     ball_ids - maps vertex i to its ball ID
  */
-double get_avg_isoperimetric_num(int *ball_ids) {
-
+double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
+    // balls - maps owner vertex i to its constituents
+    std::vector<std::vector<int>> balls(g->n, std::vector<int>());
+    std::unordered_set<int> ball_owners;
+    for (int vid = 0; vid < g->n; ++vid) {
+        balls[ball_ids[vid]].push_back(vid);
+        if (vid == ball_ids[vid]) {
+            ball_owners.insert(ball_ids[vid]);
+        }
+    }
+    int num_balls = ball_owners.size();
+    std::cout << "Num Balls: " << num_balls << std::endl;
+    double total_isoperimetric_num = 0.0;
+    
+    // Iterate over ball owners; find isoperimetric number of each ball
+    for (auto &owner : ball_owners) {
+        int degree_sum = 0;
+        int boundary_size = 0;
+        // Iterate over vertices in ball
+        for (auto &vid : balls[owner]) {
+            degree_sum += g->out_offsets[vid+1] - g->out_offsets[vid];
+            // Iterate over neighbors to count boundary size
+            for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
+                int nid = g->out_edge_list[eid];
+                // Edge spanning this ball and other ball
+                if (ball_ids[nid] != ball_ids[vid]) {
+                    boundary_size++;
+                }
+            }
+        }
+        double isoperimetric_num;
+        if (degree_sum == 0) {
+            isoperimetric_num = 0;
+        } else {
+            isoperimetric_num = ((double) boundary_size) / ((double) degree_sum);
+        }
+        // std::cout << "Isoperimetric Number of Ball " << isoperimetric_num << std::endl;
+        total_isoperimetric_num += isoperimetric_num;
+    }
+    return total_isoperimetric_num / ((double) num_balls);
 }
 
 /*
@@ -42,9 +80,9 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
 }
 
 /*
- * 
+ *
  * Computes a (beta, O(log(m)/beta)) decomposition in expectation in parallel
- * using a bottom-up approach. 
+ * using a bottom-up approach.
  *     g - graph
  *     beta - max isoperimetric number
  *     collection - list of balls
@@ -124,16 +162,18 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         num_unvisited -= shared_frontier_size;
         iter++;
     }
-    
+
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
+
     free(distances);
     free(ball_ids);
 }
 
 /*
  * Computes a (beta, O(log(m)/beta)) decomposition in expectation in parallel
- * using a top-down approach. 
+ * using a top-down approach.
  *     g - graph
  *     beta - max isoperimetric number
  *     collection - list of balls
@@ -146,7 +186,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     // Sample deltas from Exp(beta)
     double *deltas = (double *) calloc(g->n, sizeof(double));
     compute_deltas(deltas, beta, g->n);
-    
+
     // BFS
     vertex_set *frontier = (vertex_set *) malloc(sizeof(vertex_set));
     vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
@@ -230,18 +270,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
-
-    // std::unordered_set<int> ball;
-    // for (int i = 0; i < g->n; ++i) {
-    //     for (int v = 0; v < g->n; ++v) {
-    //         if (ball_ids[v] == i) {
-    //             ball.insert(v);
-    //         }
-    //     }
-    //     collection.push_back(ball);
-    //     ball.clear();
-    // }
-
+    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
 
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);

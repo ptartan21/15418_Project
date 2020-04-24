@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import sys
+import random
 
 def export_graph(G, filename):
     adj_list = nx.generate_adjlist(G)
@@ -59,6 +60,15 @@ def export_complete_graph(n):
 def mapping(x):
     return x
 
+def export_random_clustered_graph(joint_deg_seq):
+    G = nx.random_clustered_graph(joint_deg_seq)
+    G = nx.Graph(G) # remove parallel edges
+    G.remove_edges_from(nx.selfloop_edges(G)) # remove self-loops
+    gname = "random_clustered_%d" % (len(joint_deg_seq))
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -68,4 +78,14 @@ if __name__ == "__main__":
         # plt.savefig(gname)
         # plt.show()
     else:
-        print("Usage: python3 graph_gen.py [n] [p]")
+        # print("Usage: python3 graph_gen.py [n] [p]")
+        joint_deg_seq = list()
+        n = 100000
+        max_degree = 10
+        max_triangle_degree = 6
+        for i in range(n):
+            deg = random.randrange(0, max_degree)
+            triangle_deg = random.randrange(0, max_triangle_degree)
+            joint_deg_seq.append((deg, triangle_deg))
+        G, gname = export_random_clustered_graph(joint_deg_seq)
+
