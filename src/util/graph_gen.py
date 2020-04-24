@@ -4,14 +4,16 @@ import sys
 import random
 
 def export_graph(G, filename):
-    adj_list = nx.generate_adjlist(G)
+    adj_list = G.adjacency()
     n = G.number_of_nodes()
     m = G.number_of_edges()
     with open(filename, "w") as f:
         f.write("%d %d" % (n, m))
         f.write("\n")
         for row in adj_list:
-            f.write(row)
+            out = [row[0]] + list(row[1].keys())
+            out = map(lambda x: str(x), out)
+            f.write(" ".join(out))
             f.write("\n")
     print("Exported to %s" % filename)
 
@@ -68,6 +70,17 @@ def export_random_clustered_graph(joint_deg_seq):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_random_tree(n):
+    G = nx.random_tree(n)
+    gname = "random_tree_%d" % n
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
+def export_internet_graph(n):
+    G = nx.random_internet_as_graph(n)
+    gname = "random_internet_%d" % n
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
 
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
@@ -79,13 +92,17 @@ if __name__ == "__main__":
         # plt.show()
     else:
         # print("Usage: python3 graph_gen.py [n] [p]")
-        joint_deg_seq = list()
-        n = 100000
-        max_degree = 10
-        max_triangle_degree = 6
-        for i in range(n):
-            deg = random.randrange(0, max_degree)
-            triangle_deg = random.randrange(0, max_triangle_degree)
-            joint_deg_seq.append((deg, triangle_deg))
-        G, gname = export_random_clustered_graph(joint_deg_seq)
-
+        # joint_deg_seq = list()
+        # n = 100000
+        # max_degree = 30
+        # max_triangle_degree = 30
+        # for i in range(n):
+        #     deg = random.randrange(0, max_degree)
+        #     triangle_deg = random.randrange(0, max_triangle_degree)
+        #     joint_deg_seq.append((deg, triangle_deg))
+        # G, gname = export_random_clustered_graph(joint_deg_seq)
+        # export_random_tree(100000)
+        G, gname = export_internet_graph(1000)
+        nx.draw(G, with_labels = True)
+        plt.savefig(gname)
+        plt.show()

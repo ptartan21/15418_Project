@@ -62,6 +62,8 @@ void bfs_top_down_seq(Graph g, int source, int *distances) {
     }
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << "\n";
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
 }
@@ -118,5 +120,7 @@ void bfs_bottom_up_seq(Graph g, int source, int *distances) {
     }
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << "\n";
     free(frontier_size);
 }

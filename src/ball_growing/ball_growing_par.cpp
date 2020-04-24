@@ -5,6 +5,7 @@
 #include <random>
 #include <math.h>
 #include <omp.h>
+#include <limits>
 
 #define NOT_OWNED (-1)
 
@@ -61,6 +62,8 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
  */
 void inline compute_deltas(double *&deltas, float beta, int n) {
     std::default_random_engine generator;
+    // std::random_device rd;
+    // std::mt19937 generator(rd());
     std::exponential_distribution<double> distribution(beta);
     double max_delta = -1.0;
     #pragma omp parallel
@@ -77,6 +80,21 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
             deltas[i] = max_delta - deltas[i];
         }
     }
+    // double min_delta = std::numeric_limits<double>::max();
+    // #pragma omp parallel
+    // {
+    //     #pragma omp for reduction(min:min_delta) schedule(static)
+    //     for (int i = 0; i < n; ++i) {
+    //         deltas[i] = -distribution(generator);
+    //         if (deltas[i] < min_delta) {
+    //             min_delta = deltas[i];
+    //         }
+    //     }
+    //     #pragma omp for schedule(static)
+    //     for (int i = 0; i < n; ++i) {
+    //         deltas[i] = deltas[i] - min_delta;
+    //     }
+    // }
 }
 
 /*
@@ -95,6 +113,9 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     // Sample deltas from Exp(beta)
     double *deltas = (double *) calloc(g->n, sizeof(double));
     compute_deltas(deltas, beta, g->n);
+    // for (int i = 0; i < g->n; i++) {
+    //     fprintf(stderr, "vertex %d: %f\n", i, deltas[i]);
+    // }
 
     int iter = 1;
     int frontier_size = 0;
@@ -111,6 +132,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         for (int vid = 0; vid < g->n; ++vid) {
             if (deltas[vid] < iter) {
                 // Implicitly add to the frontier
+                // fprintf(stderr, "starting bfs from vertex %d\n", vid);
                 distances[vid] = iter;
                 ball_ids[vid] = vid;
                 initial_frontier_size++;
@@ -129,6 +151,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
                 if (is_unvisited(vid, distances)) {
                     // Check if vertex should start its own BFS (i.e. its delay is over)
                     if (deltas[vid] < iter) {
+                        // fprintf(stderr, "starting bfs from vertex %d\n", vid);
                         distances[vid] = iter;
                         ball_ids[vid] = vid;
                         shared_frontier_size++;
@@ -163,8 +186,12 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         iter++;
     }
 
+    // for (int i = 0; i < g->n; ++i) {
+    //     fprintf(stderr, "vertex %d is in vertex %d's ball\n", i, ball_ids[i]);
+    // }
+
     auto end_time = std::chrono::steady_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
 
     free(distances);
@@ -269,7 +296,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
 
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
 
     free_vertex_set(frontier);
