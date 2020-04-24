@@ -39,7 +39,7 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
             std::memcpy(next_frontier->vertices+next_frontier->num_vertices, local_frontier->vertices, local_frontier->num_vertices*sizeof(int));
             next_frontier->num_vertices += local_frontier->num_vertices;
         }
-        free(local_frontier);
+        free_vertex_set(local_frontier);
     }
 }
 
@@ -67,8 +67,8 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
         // Advance to the next frontier
         advance_frontier(&frontier, &next_frontier);
     }
-    free(frontier);
-    free(next_frontier);
+    free_vertex_set(frontier);
+    free_vertex_set(next_frontier);
 }
 
 /*

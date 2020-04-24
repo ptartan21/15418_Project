@@ -1,12 +1,5 @@
 #include "bfs.h"
 
-/*
- * Initializes the vertex set.
- */
-void inline init_vertex_set(vertex_set *v_set, int max_vertices) {
-    v_set->num_vertices = 0;
-    v_set->vertices = (int *) calloc(max_vertices, sizeof(int));
-}
 
 /*
  * Resets the frontier by setting its number of vertices to zero.

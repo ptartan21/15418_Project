@@ -57,8 +57,8 @@ void bfs_top_down_seq(Graph g, int source, int *distances) {
         // Advance to the next frontier
         advance_frontier(&frontier, &next_frontier);
     }
-    free(frontier);
-    free(next_frontier);
+    free_vertex_set(frontier);
+    free_vertex_set(next_frontier);
 }
 
 /*

@@ -11,6 +11,7 @@
 #include "bfs/bfs_seq.cpp"
 #include "bfs/bfs_par.cpp"
 #include "ball_growing/ball_growing_seq.cpp"
+#include "ball_growing/ball_growing_par.cpp"
 
 /*
  * Populate g
@@ -109,13 +110,21 @@ void inline ball_decomp_seq_wrapper(Graph g, float beta) {
     }
 }
 
+void inline ball_decomp_par_wrapper(Graph g, float beta) {
+    std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Parallel)" << std::endl;
+    std::vector<std::unordered_set<int>> collection;
+    std::vector<int> radii;
+    ball_decomp_par(g, beta, collection, radii);
+}
+
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = (graph_t *) malloc(sizeof(graph_t));
     load_graph(graph_in, g);
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    bfs_top_down_par_wrapper(g);
+    // bfs_top_down_par_wrapper(g);
+    ball_decomp_par_wrapper(g, 0.25);
 
     free(g);
 }
