@@ -19,10 +19,8 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
     int local_num_vertices;
     #pragma omp parallel private(local_num_vertices)
     {
-        //local_num_vertices = 0;
-        int num_threads = omp_get_num_threads();
         vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
-        init_vertex_set(local_frontier, g->n/num_threads+1);
+        init_vertex_set(local_frontier, g->n);
         // Iterate over frontier
         #pragma omp for schedule(static)
         for (int i = 0; i < frontier->num_vertices; ++i) {
