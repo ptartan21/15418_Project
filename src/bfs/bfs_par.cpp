@@ -17,9 +17,10 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
     int local_num_vertices;
     #pragma omp parallel private(local_num_vertices)
     {
-        local_num_vertices = 0;
+        //local_num_vertices = 0;
         int num_threads = omp_get_num_threads();
-        int *local_frontier = (int *) calloc(g->n/num_threads+1, sizeof(int));
+        vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
+        init_vertex_set(local_frontier, g->n/num_threads+1);
         // Iterate over frontier
         #pragma omp for schedule(static)
         for (int i = 0; i < frontier->num_vertices; ++i) {
@@ -28,15 +29,15 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
                 int nid = g->out_edge_list[eid];
                 // Use CAS to guarantee nid is only added to the frontier once
                 if (__sync_bool_compare_and_swap(&distances[nid], UNVISITED, distances[vid]+1)) {
-                    local_frontier[local_num_vertices++] = nid;
+                    local_frontier->vertices[local_frontier->num_vertices++] = nid;
                 }
             }
         }
         // Copy local next frontier to real next frontier
         #pragma omp critical
         {
-            std::memcpy(next_frontier->vertices+next_frontier->num_vertices, local_frontier, local_num_vertices*sizeof(int));
-            next_frontier->num_vertices += local_num_vertices;
+            std::memcpy(next_frontier->vertices+next_frontier->num_vertices, local_frontier->vertices, local_frontier->num_vertices*sizeof(int));
+            next_frontier->num_vertices += local_frontier->num_vertices;
         }
         free(local_frontier);
     }
