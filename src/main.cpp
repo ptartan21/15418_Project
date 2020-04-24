@@ -66,13 +66,19 @@ void inline load_graph(std::string graph_in, Graph &g) {
 }
 
 void inline bfs_top_down_seq_wrapper(Graph &g) {
+    std::cout << "Top Down BFS (Sequential)" << std::endl;
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
-
+    bfs_top_down_seq(g, 0, distances);
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
 void inline bfs_top_down_par_wrapper(Graph &g) {
+    std::cout << "Top Down BFS (Parallel)" << std::endl;
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_top_down_par(g, 0, distances);
@@ -84,16 +90,18 @@ void inline bfs_top_down_par_wrapper(Graph &g) {
 }
 
 void inline bfs_bottom_up_seq_wrapper(Graph &g) {
+    std::cout << "Bottom Up BFS (Sequential)" << std::endl;
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
-
+    bfs_bottom_up_seq(g, 0, distances);
     free(distances);
 }
 
 void inline bfs_bottom_up_par_wrapper(Graph &g) {
+    std::cout << "Bottom Up BFS (Parallel)" << std::endl;
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
-
+    bfs_bottom_up_par(g, 0, distances);
     free(distances);
 }
 
@@ -102,12 +110,12 @@ void inline ball_decomp_seq_wrapper(Graph g, float beta) {
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     ball_decomp_seq(g, beta, collection, radii);
-    for (int i = 0; i < radii.size(); ++i) {
-        for (auto &vid : collection[i]) {
-            std::cout << vid << " ";
-        }
-        std::cout << "\nRadius: " << radii[i] << "\n\n";
-    }
+    // for (int i = 0; i < radii.size(); ++i) {
+    //     for (auto &vid : collection[i]) {
+    //         std::cout << vid << " ";
+    //     }
+    //     std::cout << "\nRadius: " << radii[i] << "\n\n";
+    // }
 }
 
 void inline ball_decomp_par_wrapper(Graph g, float beta) {
@@ -122,9 +130,15 @@ int main(int argc, char **argv) {
     Graph g = (graph_t *) malloc(sizeof(graph_t));
     load_graph(graph_in, g);
 
-    // ball_decomp_seq_wrapper(g, 0.25);
+    omp_set_num_threads(8);
+
     // bfs_top_down_par_wrapper(g);
-    ball_decomp_par_wrapper(g, 0.25);
+    // ball_decomp_seq_wrapper(g, 0.25);
+    // ball_decomp_par_wrapper(g, 0.25);
+    // bfs_bottom_up_seq_wrapper(g);
+    // bfs_bottom_up_par_wrapper(g);
+    bfs_top_down_seq_wrapper(g);
+    bfs_top_down_par_wrapper(g);
 
     free(g);
 }

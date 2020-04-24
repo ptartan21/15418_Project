@@ -1,6 +1,7 @@
 #include "../util/graph.h"
 #include "../bfs/bfs.h"
 
+#include <chrono>
 #include <random>
 #include <omp.h>
 
@@ -15,6 +16,8 @@
  */
 void ball_decomp_par(Graph g, float beta, std::vector<std::unordered_set<int>> &collection,
     std::vector<int> &radii) {
+    auto start_time = std::chrono::steady_clock::now();
+
     double *deltas = (double *) malloc(g->n * sizeof(double));
     std::default_random_engine generator;
     std::exponential_distribution<double> distribution(beta);
@@ -105,13 +108,11 @@ void ball_decomp_par(Graph g, float beta, std::vector<std::unordered_set<int>> &
             ball_ids[vid] = ball_ids[owner[vid]];
         }
         advance_frontier(&frontier, &next_frontier);
-
-        fprintf(stderr, "Unvisited:\n");
-        for (auto &vid : unvisited) {
-            fprintf(stderr, "%d ", vid);
-        }
-        fprintf(stderr, "\n\n");
     }
+
+    auto end_time = std::chrono::steady_clock::now();
+    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
 
     std::unordered_set<int> ball;
     for (int i = 0; i < g->n; ++i) {

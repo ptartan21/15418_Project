@@ -2,6 +2,7 @@
 #define __BFS_H__
 
 #include "../util/graph.h"
+
 #include <cstring>
 #include <stdbool.h>
 #include <stdlib.h>

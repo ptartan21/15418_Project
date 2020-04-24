@@ -63,9 +63,9 @@ if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
         m = int(sys.argv[2])
-        G, gname = export_power_law_graph(n, m, 0.3)
-        nx.draw(G, with_labels = True)
-        plt.savefig(gname)
-        plt.show()
+        G, gname = export_random_graph(n, m)
+        # nx.draw(G, with_labels = True)
+        # plt.savefig(gname)
+        # plt.show()
     else:
         print("Usage: python3 graph_gen.py [n] [p]")

@@ -1,5 +1,7 @@
 #include "bfs.h"
 
+#include <chrono>
+
 /*
  * (SEQUENTIAL)
  * Constructs the next frontier using a top-down approach.
@@ -38,6 +40,7 @@ void inline construct_frontier_top_down_seq(Graph g, vertex_set *frontier,
  *     distances - output; distances from source
  */
 void bfs_top_down_seq(Graph g, int source, int *distances) {
+    auto start_time = std::chrono::steady_clock::now();
     // Initialize frontiers
     vertex_set *frontier = (vertex_set *) malloc(sizeof(vertex_set));
     vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
@@ -57,6 +60,8 @@ void bfs_top_down_seq(Graph g, int source, int *distances) {
         // Advance to the next frontier
         advance_frontier(&frontier, &next_frontier);
     }
+    auto end_time = std::chrono::steady_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
 }
@@ -99,6 +104,7 @@ void inline construct_frontier_bottom_up_seq(Graph g, int *frontier_size,
  *     distances - output; distances from source
  */
 void bfs_bottom_up_seq(Graph g, int source, int *distances) {
+    auto start_time = std::chrono::steady_clock::now();
     int iter = 1;
     int *frontier_size = (int *) calloc(1, sizeof(int));
     for (int vid = 0; vid < g->n; ++vid) {
@@ -110,5 +116,7 @@ void bfs_bottom_up_seq(Graph g, int source, int *distances) {
         construct_frontier_bottom_up_seq(g, frontier_size, iter, distances);
         iter++;
     }
+    auto end_time = std::chrono::steady_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     free(frontier_size);
 }

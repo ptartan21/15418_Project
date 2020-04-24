@@ -1,5 +1,6 @@
 #include "../util/graph.h"
 
+#include <chrono>
 #include <vector>
 #include <unordered_set>
 
@@ -79,6 +80,8 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
  *     radii - list of radii
  */
 void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &collection, std::vector<int> &radii) {
+    auto start_time = std::chrono::steady_clock::now();
+
     // Initially, all vertices present
     std::vector<bool> present(g->n, PRESENT);
     std::unordered_set<int> ball;
@@ -94,4 +97,8 @@ void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &
             ball.clear();
         }
     }
+
+    auto end_time = std::chrono::steady_clock::now();
+    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
 }
