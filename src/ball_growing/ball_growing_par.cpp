@@ -191,6 +191,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     // }
 
     auto end_time = std::chrono::steady_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
 
@@ -296,6 +297,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
 
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
 
