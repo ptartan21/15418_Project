@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
     Graph g = (graph_t *) malloc(sizeof(graph_t));
     load_graph(graph_in, g);
 
-    int num_threads = 1;
+    int num_threads = 8;
     omp_set_num_threads(num_threads);
     std::cout << "Number of Threads: " << num_threads << std::endl;
 

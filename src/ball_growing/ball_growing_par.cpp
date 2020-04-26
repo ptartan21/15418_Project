@@ -106,6 +106,7 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
     std::default_random_engine generator(418);
     std::exponential_distribution<double> distribution(beta);
     double max_delta = -1.0;
+    omp_set_num_threads(1);
     #pragma omp parallel
     {
         #pragma omp for reduction(max:max_delta) schedule(static)
@@ -120,6 +121,7 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
             deltas[i] = max_delta - deltas[i];
         }
     }
+    omp_set_num_threads(8);
 }
 
 /*
@@ -149,7 +151,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     // BFS
     while (num_unvisited > 0) {
         int shared_frontier_size = 0;
-        #pragma omp parallel
+        #pragma omp parallel shared(distances, deltas, ball_ids, shared_frontier_size)
         {
             #pragma omp for reduction(+:shared_frontier_size) schedule(static)
             for (int vid = 0; vid < g->n; ++vid) {

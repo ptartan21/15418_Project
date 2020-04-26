@@ -4,6 +4,11 @@
 #include <vector>
 #include <unordered_set>
 
+/*
+ * Returns the average isoperimetric number.
+ *     g - graph
+ *     collection - collection of balls
+ */
 double get_avg_isoperimetric_num(Graph &g, std::vector<std::unordered_set<int>> &collection) {
     double total_isoperimetric_num = 0.0;
     int num_balls = collection.size();
@@ -27,12 +32,39 @@ double get_avg_isoperimetric_num(Graph &g, std::vector<std::unordered_set<int>> 
         } else {
             isoperimetric_num = ((double) boundary_size) / ((double) degree_sum);
         }
-        // std::cout << "Isoperimetric Number of Ball " << isoperimetric_num << std::endl;
         total_isoperimetric_num += isoperimetric_num;
     }
     return total_isoperimetric_num / ((double) num_balls);
 }
 
+/*
+ * Returns the fraction of edges that are intercluster.
+ *     g - graph
+ *     collection - collection of balls
+ */
+double get_frac_intercluster_edges(Graph &g, std::vector<std::unordered_set<int>> &collection) {
+    int total_intercluster_edges = 0;
+    for (auto &ball : collection) {
+        for (auto &vid : ball) {
+            for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
+                int nid = g->out_edge_list[eid];
+                if (ball.find(nid) == ball.end()) {
+                    total_intercluster_edges++;
+                }
+            }
+        }
+    }
+    // Divide by 2 because each edge is double-counted
+    return ((double) total_intercluster_edges) / ((double) g->m) / 2.0;
+}
+
+/*
+ * Returns the degree of the given vertex according to which vertices are
+ * still present.
+ *     g - graph
+ *     vid - vertex ID
+ *     present - indicates if each vertex remains in the graph
+ */
 int inline find_degree(Graph g, int vid, std::vector<bool> &present) {
     int degree = 0;
     for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
@@ -44,6 +76,15 @@ int inline find_degree(Graph g, int vid, std::vector<bool> &present) {
     return degree;
 }
 
+/*
+ * Grows a ball from the source until the isoperimetric number is at most beta.
+ *     g - graph
+ *     source - source vertex to start BFS
+ *     beta - desired isoperimetric number
+ *     present - indicates if each vertex remains in the graph
+ *     ball - output; set of vertices in the ball
+ *     R - radius of the outputted ball
+ */
 void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std::unordered_set<int> &ball, int &R) {
     int r = 1;
     float isoperimetric_num;
@@ -107,14 +148,21 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
         next_frontier.clear();
         r++;
     }
+    // Remove the vertices in the ball from the graph
     for (auto &vid : ball) {
         present[vid] = false;
-        // std::cout << vid << " ";
     }
-    // std::cout << "\n";
     R = r-1;
 }
 
+/*
+ * Computes a low diameter decomposition of the graph by repeatedly growing a
+ * ball and removing it from the graph. 
+ *     g - graph
+ *     beta - desired isoperimetric number per ball
+ *     collection - output; collection of balls
+ *     radii - output; radii of the balls
+ */
 void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &collection, std::vector<int> &radii) {
     auto start_time = std::chrono::steady_clock::now();
     std::vector<bool> present(g->n, true);
@@ -126,11 +174,10 @@ void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &
             collection.push_back(ball);
             radii.push_back(R);
             ball.clear();
-            // std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, collection) << std::endl;
         }
     }
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Num Balls: " << collection.size() << std::endl;
-    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, collection) << std::endl;
+    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, collection) << std::endl;
 }
