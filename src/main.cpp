@@ -142,8 +142,8 @@ int main(int argc, char **argv) {
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
     ball_decomp_seq_wrapper(g, 0.5);
-    ball_decomp_bottom_up_par_wrapper(g, 0.25);
-    ball_decomp_top_down_par_wrapper(g, 0.25);
+    ball_decomp_bottom_up_par_wrapper(g, 0.5);
+    ball_decomp_top_down_par_wrapper(g, 0.5);
     // bfs_bottom_up_seq_wrapper(g);
     // bfs_bottom_up_par_wrapper(g);
     // bfs_top_down_seq_wrapper(g);

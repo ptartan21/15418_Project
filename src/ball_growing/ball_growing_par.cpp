@@ -55,7 +55,7 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
         }
         total_isoperimetric_num += isoperimetric_num;
     }
-    return total_isoperimetric_num / ((double) num_balls);
+    return total_isoperimetric_num / ((double) num_balls) / 2.0;
 }
 
 /*
@@ -109,20 +109,20 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     int num_unvisited = g->n;
 
     // Construct initial frontier
-    int initial_frontier_size = 0;
-    #pragma omp parallel
-    {
-        #pragma omp for reduction(+:initial_frontier_size) schedule(static)
-        for (int vid = 0; vid < g->n; ++vid) {
-            if (deltas[vid] < iter) {
-                // Implicitly add to the frontier
-                distances[vid] = iter;
-                ball_ids[vid] = vid;
-                initial_frontier_size++;
-            }
-        }
-    }
-    num_unvisited -= initial_frontier_size;
+    // int initial_frontier_size = 0;
+    // #pragma omp parallel
+    // {
+    //     #pragma omp for reduction(+:initial_frontier_size) schedule(static)
+    //     for (int vid = 0; vid < g->n; ++vid) {
+    //         if (deltas[vid] < iter) {
+    //             // Implicitly add to the frontier
+    //             distances[vid] = iter;
+    //             ball_ids[vid] = vid;
+    //             initial_frontier_size++;
+    //         }
+    //     }
+    // }
+    // num_unvisited -= initial_frontier_size;
 
     // BFS
     while (num_unvisited > 0) {
@@ -156,7 +156,9 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
                             }
                         }
                         if (visited) {
+                            // fprintf(stderr, "%d claimed by %d\n", vid, owner);
                             ball_ids[vid] = ball_ids[owner];
+                            deltas[vid] = deltas[owner];
                             distances[vid] = iter;
                             shared_frontier_size++;
                         }
@@ -166,6 +168,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         }
         num_unvisited -= shared_frontier_size;
         iter++;
+        // fprintf(stderr, "iter: %d\n\n", iter);
     }
 
     auto end_time = std::chrono::steady_clock::now();
@@ -207,27 +210,42 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     // Mark all vertices as unvisited
     for (int vid = 0; vid < g->n; ++vid) {
         unvisited.insert(vid);
+        if (deltas[vid] < 1) {
+        }
     }
     std::vector<int> owner = std::vector<int>(g->n, NOT_OWNED);
     while (unvisited.size() > 0) {
 
-        // Add all unvisited vertices with delta < iter into frontier
+        // // Add all unvisited vertices with delta < iter into frontier
+        // for (auto &vid : unvisited) {
+        //     if (deltas[vid] < iter) {
+        //         frontier->vertices[frontier->num_vertices++] = vid;
+        //         ball_ids[vid] = vid;
+        //     }
+        // }
+        // // Mark the frontier vertices as visited
+        // for (int i = 0; i < frontier->num_vertices; ++i) {
+        //     int vid = frontier->vertices[i];
+        //     unvisited.erase(vid);
+        // }
+        // if (unvisited.size() == 0) {
+        //     break;
+        // }
+        // Reset the next frontier
+        reset_frontier(next_frontier);
+
         for (auto &vid : unvisited) {
-            if (deltas[vid] < ((double) iter)) {
-                frontier->vertices[frontier->num_vertices++] = vid;
+            if (deltas[vid] < iter) {
+                next_frontier->vertices[next_frontier->num_vertices++] = vid;
+                owner[vid] = vid;
                 ball_ids[vid] = vid;
             }
         }
-        // Mark the frontier vertices as visited
-        for (int i = 0; i < frontier->num_vertices; ++i) {
-            int vid = frontier->vertices[i];
+        for (int i = 0; i < next_frontier->num_vertices; ++i) {
+            int vid = next_frontier->vertices[i];
             unvisited.erase(vid);
         }
-        if (unvisited.size() == 0) {
-            break;
-        }
-        // Reset the next frontier
-        reset_frontier(next_frontier);
+
         int thread_id;
         #pragma omp parallel private(thread_id)
         {
@@ -248,6 +266,8 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
                             if (ovid == NOT_OWNED) {
                                 owner[nid] = vid;
                                 local_frontier->vertices[local_frontier->num_vertices++] = nid;
+                                // fprintf(stderr, "%d claimed by %d\n", nid, vid);
+                                deltas[nid] = deltas[vid];
                             }
                             // nid has been reached by some other vertex in frontier
                             else {
@@ -255,7 +275,9 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
                                 double vid_delta_frac = modf(deltas[vid], &vid_delta_int);
                                 double ovid_delta_frac = modf(deltas[ovid], &ovid_delta_int);
                                 if (vid_delta_frac < ovid_delta_frac) {
+                                    // fprintf(stderr, "%d stolen from %d by %d\n", nid, owner[nid], vid);
                                     owner[nid] = vid;
+                                    deltas[nid] = deltas[vid];
                                 }
                             }
                         }
@@ -271,6 +293,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
             free_vertex_set(local_frontier);
         }
         iter++;
+        // fprintf(stderr, "iter: %d\n\n", iter);
         // Mark all vertices in the next frontier as visited
         // Update ball ID of every vertex in the next frontier
         for (int i = 0; i < next_frontier->num_vertices; ++i) {
