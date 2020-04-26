@@ -84,7 +84,7 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
  *     iter - current iteration; distance of vertices added to frontier from source
  *     distances - distances from source
  */
- void inline construct_frontier_bottom_up_par(Graph g, int *frontier_size,
+ void inline construct_frontier_bottom_up_par(Graph g, int &frontier_size,
     int iter, int *distances) {
     int shared_frontier_size = 0;
     #pragma omp parallel
@@ -104,7 +104,7 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
             }
         }
     }
-    *frontier_size = shared_frontier_size;
+    frontier_size = shared_frontier_size;
 }
 
 /*
@@ -117,13 +117,10 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
 void bfs_bottom_up_par(Graph g, int source, int *distances) {
     auto start_time = std::chrono::steady_clock::now();
     int iter = 1;
-    int *frontier_size = (int *) calloc(1, sizeof(int));
-    for (int vid = 0; vid < g->n; ++vid) {
-        mark_unvisited(vid, distances);
-    }
-    *frontier_size = 1;
+    memset(distances, UNVISITED, g->n*sizeof(int));
+    int frontier_size = 1;
     distances[source] = 0;
-    while (*frontier_size > 0) {
+    while (frontier_size > 0) {
         construct_frontier_bottom_up_par(g, frontier_size, iter, distances);
         iter++;
     }
@@ -131,5 +128,4 @@ void bfs_bottom_up_par(Graph g, int source, int *distances) {
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "\n";
-    free(frontier_size);
 }
