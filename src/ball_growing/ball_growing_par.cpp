@@ -10,6 +10,8 @@
 #define NOT_OWNED (-1)
 
 /*
+ * 
+ *     g - graph
  *     ball_ids - maps vertex i to its ball ID
  */
 double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
@@ -30,8 +32,10 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
     for (auto &owner : ball_owners) {
         int degree_sum = 0;
         int boundary_size = 0;
+        // fprintf(stderr, "Ball owned by vertex %d\n", owner);
         // Iterate over vertices in ball
         for (auto &vid : balls[owner]) {
+            // fprintf(stderr, "%d ", vid);
             degree_sum += g->out_offsets[vid+1] - g->out_offsets[vid];
             // Iterate over neighbors to count boundary size
             for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
@@ -42,13 +46,13 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
                 }
             }
         }
+        // fprintf(stderr, "\n");
         double isoperimetric_num;
         if (degree_sum == 0) {
             isoperimetric_num = 0;
         } else {
             isoperimetric_num = ((double) boundary_size) / ((double) degree_sum);
         }
-        // std::cout << "Isoperimetric Number of Ball " << isoperimetric_num << std::endl;
         total_isoperimetric_num += isoperimetric_num;
     }
     return total_isoperimetric_num / ((double) num_balls);
@@ -61,9 +65,7 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
  *     n - length of deltas
  */
 void inline compute_deltas(double *&deltas, float beta, int n) {
-    std::default_random_engine generator;
-    // std::random_device rd;
-    // std::mt19937 generator(rd());
+    std::default_random_engine generator(418);
     std::exponential_distribution<double> distribution(beta);
     double max_delta = -1.0;
     #pragma omp parallel
@@ -80,21 +82,6 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
             deltas[i] = max_delta - deltas[i];
         }
     }
-    // double min_delta = std::numeric_limits<double>::max();
-    // #pragma omp parallel
-    // {
-    //     #pragma omp for reduction(min:min_delta) schedule(static)
-    //     for (int i = 0; i < n; ++i) {
-    //         deltas[i] = -distribution(generator);
-    //         if (deltas[i] < min_delta) {
-    //             min_delta = deltas[i];
-    //         }
-    //     }
-    //     #pragma omp for schedule(static)
-    //     for (int i = 0; i < n; ++i) {
-    //         deltas[i] = deltas[i] - min_delta;
-    //     }
-    // }
 }
 
 /*
@@ -113,14 +100,11 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     // Sample deltas from Exp(beta)
     double *deltas = (double *) calloc(g->n, sizeof(double));
     compute_deltas(deltas, beta, g->n);
-    // for (int i = 0; i < g->n; i++) {
-    //     fprintf(stderr, "vertex %d: %f\n", i, deltas[i]);
-    // }
 
     int iter = 1;
     int frontier_size = 0;
     int *distances = (int *) malloc(g->n * sizeof(int));
-    memset(distances, UNVISITED, g->n * sizeof(int)); // careful about UNVISITED being -1
+    memset(distances, UNVISITED, g->n * sizeof(int));
     int *ball_ids = (int *) calloc(g->n, sizeof(int));
     int num_unvisited = g->n;
 
@@ -132,7 +116,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         for (int vid = 0; vid < g->n; ++vid) {
             if (deltas[vid] < iter) {
                 // Implicitly add to the frontier
-                // fprintf(stderr, "starting bfs from vertex %d\n", vid);
                 distances[vid] = iter;
                 ball_ids[vid] = vid;
                 initial_frontier_size++;
@@ -151,7 +134,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
                 if (is_unvisited(vid, distances)) {
                     // Check if vertex should start its own BFS (i.e. its delay is over)
                     if (deltas[vid] < iter) {
-                        // fprintf(stderr, "starting bfs from vertex %d\n", vid);
                         distances[vid] = iter;
                         ball_ids[vid] = vid;
                         shared_frontier_size++;
@@ -185,10 +167,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         num_unvisited -= shared_frontier_size;
         iter++;
     }
-
-    // for (int i = 0; i < g->n; ++i) {
-    //     fprintf(stderr, "vertex %d is in vertex %d's ball\n", i, ball_ids[i]);
-    // }
 
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
@@ -235,7 +213,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
 
         // Add all unvisited vertices with delta < iter into frontier
         for (auto &vid : unvisited) {
-            if (deltas[vid] < iter) {
+            if (deltas[vid] < ((double) iter)) {
                 frontier->vertices[frontier->num_vertices++] = vid;
                 ball_ids[vid] = vid;
             }
@@ -244,6 +222,9 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
         for (int i = 0; i < frontier->num_vertices; ++i) {
             int vid = frontier->vertices[i];
             unvisited.erase(vid);
+        }
+        if (unvisited.size() == 0) {
+            break;
         }
         // Reset the next frontier
         reset_frontier(next_frontier);
@@ -269,8 +250,13 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
                                 local_frontier->vertices[local_frontier->num_vertices++] = nid;
                             }
                             // nid has been reached by some other vertex in frontier
-                            else if (deltas[vid] < deltas[ovid]) {
-                                owner[nid] = vid;
+                            else {
+                                double vid_delta_int, ovid_delta_int;
+                                double vid_delta_frac = modf(deltas[vid], &vid_delta_int);
+                                double ovid_delta_frac = modf(deltas[ovid], &ovid_delta_int);
+                                if (vid_delta_frac < ovid_delta_frac) {
+                                    owner[nid] = vid;
+                                }
                             }
                         }
                     }
