@@ -30,7 +30,7 @@ double get_avg_isoperimetric_num(Graph &g, std::vector<std::unordered_set<int>> 
         // std::cout << "Isoperimetric Number of Ball " << isoperimetric_num << std::endl;
         total_isoperimetric_num += isoperimetric_num;
     }
-    return total_isoperimetric_num / ((double) num_balls) / 2.0;
+    return total_isoperimetric_num / ((double) num_balls);
 }
 
 int inline find_degree(Graph g, int vid, std::vector<bool> &present) {

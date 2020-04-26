@@ -44,7 +44,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
             in_mapper[v].push_back(cur);
         }
     }
-    g->out_offsets[n] = m;
+    g->out_offsets[n] = 2*m;
 
     // populating the in-neighbor portion of the graph
     g->in_offsets   = (int *) calloc(n + 1, sizeof(int));
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     omp_set_num_threads(num_threads);
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
-    ball_decomp_seq_wrapper(g, 0.5);
+    ball_decomp_seq_wrapper(g, 0.25);
     ball_decomp_bottom_up_par_wrapper(g, 0.5);
     ball_decomp_top_down_par_wrapper(g, 0.5);
     // bfs_bottom_up_seq_wrapper(g);

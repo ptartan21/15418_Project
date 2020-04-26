@@ -10,7 +10,7 @@
 #define NOT_OWNED (-1)
 
 /*
- * 
+ * Returns the average isoperimetric number.
  *     g - graph
  *     ball_ids - maps vertex i to its ball ID
  */
@@ -27,15 +27,12 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
     int num_balls = ball_owners.size();
     std::cout << "Num Balls: " << num_balls << std::endl;
     double total_isoperimetric_num = 0.0;
-    
     // Iterate over ball owners; find isoperimetric number of each ball
     for (auto &owner : ball_owners) {
         int degree_sum = 0;
         int boundary_size = 0;
-        // fprintf(stderr, "Ball owned by vertex %d\n", owner);
         // Iterate over vertices in ball
         for (auto &vid : balls[owner]) {
-            // fprintf(stderr, "%d ", vid);
             degree_sum += g->out_offsets[vid+1] - g->out_offsets[vid];
             // Iterate over neighbors to count boundary size
             for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
@@ -45,8 +42,8 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
                     boundary_size++;
                 }
             }
+
         }
-        // fprintf(stderr, "\n");
         double isoperimetric_num;
         if (degree_sum == 0) {
             isoperimetric_num = 0;
@@ -55,7 +52,48 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
         }
         total_isoperimetric_num += isoperimetric_num;
     }
-    return total_isoperimetric_num / ((double) num_balls) / 2.0;
+    return total_isoperimetric_num / ((double) num_balls);
+}
+
+/*
+ * Returns the fraction of edges that are intercluster.
+ *     g - graph
+ *     ball_ids - maps vertex i to its ball ID
+ */
+double get_frac_intercluster_edges(Graph &g, int *ball_ids) {
+    // balls - maps owner vertex i to its constituents
+    std::vector<std::vector<int>> balls(g->n, std::vector<int>());
+    std::unordered_set<int> ball_owners;
+    for (int vid = 0; vid < g->n; ++vid) {
+        balls[ball_ids[vid]].push_back(vid);
+        if (vid == ball_ids[vid]) {
+            ball_owners.insert(ball_ids[vid]);
+        }
+    }
+    int num_balls = ball_owners.size();
+    std::cout << "Num Balls: " << num_balls << std::endl;
+    int total_intercluster_edges = 0;
+    // Iterate over ball owners; find isoperimetric number of each ball
+    for (auto &owner : ball_owners) {
+        int degree_sum = 0;
+        int boundary_size = 0;
+        // Iterate over vertices in ball
+        for (auto &vid : balls[owner]) {
+            degree_sum += g->out_offsets[vid+1] - g->out_offsets[vid];
+            // Iterate over neighbors to count boundary size
+            for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
+                int nid = g->out_edge_list[eid];
+                // Edge spanning this ball and other ball
+                if (ball_ids[nid] != ball_ids[vid]) {
+                    boundary_size++;
+                }
+            }
+
+        }
+        total_intercluster_edges += boundary_size;
+    }
+    // Divide by 2 because each edge is double-counted
+    return ((double) total_intercluster_edges) / ((double) g->m) / 2.0;
 }
 
 /*
@@ -108,22 +146,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     int *ball_ids = (int *) calloc(g->n, sizeof(int));
     int num_unvisited = g->n;
 
-    // Construct initial frontier
-    // int initial_frontier_size = 0;
-    // #pragma omp parallel
-    // {
-    //     #pragma omp for reduction(+:initial_frontier_size) schedule(static)
-    //     for (int vid = 0; vid < g->n; ++vid) {
-    //         if (deltas[vid] < iter) {
-    //             // Implicitly add to the frontier
-    //             distances[vid] = iter;
-    //             ball_ids[vid] = vid;
-    //             initial_frontier_size++;
-    //         }
-    //     }
-    // }
-    // num_unvisited -= initial_frontier_size;
-
     // BFS
     while (num_unvisited > 0) {
         int shared_frontier_size = 0;
@@ -156,7 +178,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
                             }
                         }
                         if (visited) {
-                            // fprintf(stderr, "%d claimed by %d\n", vid, owner);
                             ball_ids[vid] = ball_ids[owner];
                             deltas[vid] = deltas[owner];
                             distances[vid] = iter;
@@ -168,13 +189,12 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
         }
         num_unvisited -= shared_frontier_size;
         iter++;
-        // fprintf(stderr, "iter: %d\n\n", iter);
     }
 
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
-    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
+    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
 
     free(distances);
     free(ball_ids);
@@ -215,22 +235,6 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     }
     std::vector<int> owner = std::vector<int>(g->n, NOT_OWNED);
     while (unvisited.size() > 0) {
-
-        // // Add all unvisited vertices with delta < iter into frontier
-        // for (auto &vid : unvisited) {
-        //     if (deltas[vid] < iter) {
-        //         frontier->vertices[frontier->num_vertices++] = vid;
-        //         ball_ids[vid] = vid;
-        //     }
-        // }
-        // // Mark the frontier vertices as visited
-        // for (int i = 0; i < frontier->num_vertices; ++i) {
-        //     int vid = frontier->vertices[i];
-        //     unvisited.erase(vid);
-        // }
-        // if (unvisited.size() == 0) {
-        //     break;
-        // }
         // Reset the next frontier
         reset_frontier(next_frontier);
 
@@ -266,7 +270,6 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
                             if (ovid == NOT_OWNED) {
                                 owner[nid] = vid;
                                 local_frontier->vertices[local_frontier->num_vertices++] = nid;
-                                // fprintf(stderr, "%d claimed by %d\n", nid, vid);
                                 deltas[nid] = deltas[vid];
                             }
                             // nid has been reached by some other vertex in frontier
@@ -275,7 +278,6 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
                                 double vid_delta_frac = modf(deltas[vid], &vid_delta_int);
                                 double ovid_delta_frac = modf(deltas[ovid], &ovid_delta_int);
                                 if (vid_delta_frac < ovid_delta_frac) {
-                                    // fprintf(stderr, "%d stolen from %d by %d\n", nid, owner[nid], vid);
                                     owner[nid] = vid;
                                     deltas[nid] = deltas[vid];
                                 }
@@ -293,7 +295,6 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
             free_vertex_set(local_frontier);
         }
         iter++;
-        // fprintf(stderr, "iter: %d\n\n", iter);
         // Mark all vertices in the next frontier as visited
         // Update ball ID of every vertex in the next frontier
         for (int i = 0; i < next_frontier->num_vertices; ++i) {
@@ -308,7 +309,7 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
-    std::cout << "Avg Isoperimetric Number: " << get_avg_isoperimetric_num(g, ball_ids) << std::endl;
+    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
 
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
