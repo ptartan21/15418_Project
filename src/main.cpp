@@ -10,6 +10,7 @@
 #include "util/graph.h"
 #include "bfs/bfs_seq.cpp"
 #include "bfs/bfs_par.cpp"
+#include "bfs/bfs_hybrid.cpp"
 #include "ball_growing/ball_growing_seq.cpp"
 #include "ball_growing/ball_growing_par.cpp"
 
@@ -70,10 +71,10 @@ void inline bfs_top_down_seq_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_top_down_seq(g, 0, distances);
-    for (int i = 0; i < g->n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << std::endl;
+    // for (int i = 0; i < g->n; ++i) {
+    //     std::cout << distances[i] << " ";
+    // }
+    // std::cout << std::endl;
     free(distances);
 }
 
@@ -82,10 +83,10 @@ void inline bfs_top_down_par_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_top_down_par(g, 0, distances);
-    for (int i = 0; i < g->n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << std::endl;
+    // for (int i = 0; i < g->n; ++i) {
+    //     std::cout << distances[i] << " ";
+    // }
+    // std::cout << std::endl;
     free(distances);
 }
 
@@ -94,10 +95,10 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_bottom_up_seq(g, 0, distances);
-    for (int i = 0; i < g->n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << std::endl;
+    // for (int i = 0; i < g->n; ++i) {
+    //     std::cout << distances[i] << " ";
+    // }
+    // std::cout << std::endl;
     free(distances);
 }
 
@@ -106,10 +107,22 @@ void inline bfs_bottom_up_par_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_bottom_up_par(g, 0, distances);
-    for (int i = 0; i < g->n; ++i) {
-        std::cout << distances[i] << " ";
-    }
-    std::cout << std::endl;
+    // for (int i = 0; i < g->n; ++i) {
+    //     std::cout << distances[i] << " ";
+    // }
+    // std::cout << std::endl;
+    free(distances);
+}
+
+void inline bfs_hybrid_wrapper(Graph &g) {
+    std::cout << "Hybrid BFS (Parallel)" << std::endl;
+    int n = g->n;
+    int *distances = (int *) calloc(n, sizeof(int));
+    bfs_hybrid(g, 0, distances);
+    // for (int i = 0; i < g->n; ++i) {
+    //     std::cout << distances[i] << " ";
+    // }
+    // std::cout << std::endl;
     free(distances);
 }
 
@@ -140,6 +153,21 @@ void inline ball_decomp_top_down_par_wrapper(Graph g, float beta) {
     ball_decomp_top_down_par(g, beta, collection, radii);
 }
 
+void inline bfs_correctness_wrapper(Graph &g) {
+    int n = g->n;
+    int *distances_ref = (int *) calloc(n, sizeof(int));
+    int *distances_test = (int *) calloc(n, sizeof(int));
+    bfs_top_down_seq(g, 0, distances_ref);
+    bfs_hybrid(g, 0, distances_test);
+    for (int i = 0; i < n; ++i) {
+        if (distances_ref[i] != distances_test[i]) {
+            fprintf(stderr, "Mismatch at %d\n", i);
+        }
+    }
+    free(distances_ref);
+    free(distances_test);
+}
+
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = (graph_t *) malloc(sizeof(graph_t));
@@ -156,6 +184,8 @@ int main(int argc, char **argv) {
     bfs_bottom_up_par_wrapper(g);
     bfs_top_down_seq_wrapper(g);
     bfs_top_down_par_wrapper(g);
+    bfs_hybrid_wrapper(g);
+    bfs_correctness_wrapper(g);
 
     free(g);
 }
