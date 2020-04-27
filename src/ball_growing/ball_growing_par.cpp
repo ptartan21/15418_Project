@@ -6,8 +6,6 @@
 #include <math.h>
 #include <omp.h>
 
-#define NOT_OWNED (-1)
-
 /*
  * Returns the average isoperimetric number.
  *     g - graph
@@ -246,8 +244,7 @@ void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_s
             unvisited.erase(vid);
         }
 
-        int thread_id;
-        #pragma omp parallel private(thread_id)
+        #pragma omp parallel
         {
             vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
             init_vertex_set(local_frontier, g->n);
@@ -290,7 +287,6 @@ void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_s
             }
             free_vertex_set(local_frontier);
         }
-        iter++;
         // Mark all vertices in the next frontier as visited
         // Update ball ID of every vertex in the next frontier
         for (int i = 0; i < next_frontier->num_vertices; ++i) {
@@ -299,6 +295,7 @@ void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_s
             ball_ids[vid] = ball_ids[owner[vid]];
         }
         advance_frontier(&frontier, &next_frontier);
+        iter++;
     }
 
     auto end_time = std::chrono::steady_clock::now();
