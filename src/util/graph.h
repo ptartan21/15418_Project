@@ -12,7 +12,7 @@ typedef struct {
 
     int *in_offsets;
     int *in_edge_list;
-
+    
 } graph_t, *Graph;
 
 struct vertex_set {

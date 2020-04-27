@@ -3,10 +3,7 @@
 #include <omp.h>
 #include <chrono>
 
-#define TOP_DOWN 1
-#define BOTTOM_UP 0
-
-void inline top_down_step(Graph g, vertex_set *frontier, vertex_set *next_frontier, 
+void inline bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set *next_frontier, 
     int *distances, int &num_frontier_edges, int &num_edges_checked) {
     int local_num_frontier_edges = 0;
     int local_num_edges_checked = 0;
@@ -40,7 +37,7 @@ void inline top_down_step(Graph g, vertex_set *frontier, vertex_set *next_fronti
     }
 }
 
-void inline bottom_up_step(Graph g, int &frontier_size, int iter, int *distances) {
+void inline bfs_bottom_up_step(Graph g, int &frontier_size, int iter, int *distances) {
     int shared_frontier_size = 0;
     #pragma omp parallel
     {
@@ -97,13 +94,13 @@ void bfs_hybrid(Graph g, int source, int *distances) {
             bool should_switch = ((double) num_frontier_edges) > (((double) num_unvisited_edges) / alpha);
             if (should_switch) {
                 last_step = BOTTOM_UP;
-                bottom_up_step(g, frontier_size, iter, distances);
+                bfs_bottom_up_step(g, frontier_size, iter, distances);
             } else {
                 reset_frontier(next_frontier);
                 int num_edges_checked = 0;
-                top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
+                bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
                 num_unvisited_edges -= num_edges_checked;
-                advance_frontier(&frontier, &next_frontier);
+                advance_frontier(frontier, next_frontier);
             }
         } else {
             bool should_switch = ((double) frontier_size) < (((double) g->n) / beta);
@@ -121,11 +118,11 @@ void bfs_hybrid(Graph g, int source, int *distances) {
                 }
                 reset_frontier(next_frontier);
                 int num_edges_checked = 0;
-                top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
+                bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
                 num_unvisited_edges -= num_edges_checked;
-                advance_frontier(&frontier, &next_frontier);
+                advance_frontier(frontier, next_frontier);
             } else {
-                bottom_up_step(g, frontier_size, iter, distances);
+                bfs_bottom_up_step(g, frontier_size, iter, distances);
             }
         }
         iter++;

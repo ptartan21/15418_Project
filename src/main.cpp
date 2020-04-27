@@ -13,6 +13,7 @@
 #include "bfs/bfs_hybrid.cpp"
 #include "ball_growing/ball_growing_seq.cpp"
 #include "ball_growing/ball_growing_par.cpp"
+#include "ball_growing/ball_growing_hybrid.cpp"
 
 /*
  * Populate g
@@ -153,6 +154,13 @@ void inline ball_decomp_top_down_par_wrapper(Graph g, float beta) {
     ball_decomp_top_down_par(g, beta, collection, radii);
 }
 
+void inline ball_decomp_hybrid_wrapper(Graph g, float beta) {
+    std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Hybrid, Parallel)" << std::endl;
+    std::vector<std::unordered_set<int>> collection;
+    std::vector<int> radii;
+    ball_decomp_hybrid(g, beta, collection, radii);
+}
+
 void inline bfs_correctness_wrapper(Graph &g) {
     int n = g->n;
     int *distances_ref = (int *) calloc(n, sizeof(int));
@@ -178,14 +186,15 @@ int main(int argc, char **argv) {
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    // ball_decomp_bottom_up_par_wrapper(g, 0.5);
-    // ball_decomp_top_down_par_wrapper(g, 0.5);
-    bfs_bottom_up_seq_wrapper(g);
-    bfs_bottom_up_par_wrapper(g);
-    bfs_top_down_seq_wrapper(g);
-    bfs_top_down_par_wrapper(g);
-    bfs_hybrid_wrapper(g);
-    bfs_correctness_wrapper(g);
+    ball_decomp_bottom_up_par_wrapper(g, 0.5);
+    ball_decomp_top_down_par_wrapper(g, 0.5);
+    ball_decomp_hybrid_wrapper(g, 0.5);
+    // bfs_bottom_up_seq_wrapper(g);
+    // bfs_bottom_up_par_wrapper(g);
+    // bfs_top_down_seq_wrapper(g);
+    // bfs_top_down_par_wrapper(g);
+    // bfs_hybrid_wrapper(g);
+    // bfs_correctness_wrapper(g);
 
     free(g);
 }

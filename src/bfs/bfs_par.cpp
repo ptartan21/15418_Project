@@ -65,7 +65,7 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
         // Construct the next frontier
         construct_frontier_top_down_par(g, frontier, next_frontier, distances);
         // Advance to the next frontier
-        advance_frontier(&frontier, &next_frontier);
+        advance_frontier(frontier, next_frontier);
     }
     auto end_time = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
