@@ -5,7 +5,6 @@
 #include <random>
 #include <math.h>
 #include <omp.h>
-#include <limits>
 
 #define NOT_OWNED (-1)
 
@@ -102,7 +101,7 @@ double get_frac_intercluster_edges(Graph &g, int *ball_ids) {
  *     beta - exponential distribution parameter
  *     n - length of deltas
  */
-void inline compute_deltas(double *&deltas, float beta, int n) {
+void inline compute_deltas(double *&deltas, double beta, int n) {
     std::default_random_engine generator(418);
     std::exponential_distribution<double> distribution(beta);
     double max_delta = -1.0;
@@ -133,7 +132,7 @@ void inline compute_deltas(double *&deltas, float beta, int n) {
  *     collection - list of balls
  *     radii - list of radii
  */
-void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_set<int>> &collection,
+void ball_decomp_bottom_up_par(Graph g, double beta, std::vector<std::unordered_set<int>> &collection,
     std::vector<int> &radii) {
     auto start_time = std::chrono::steady_clock::now();
 
@@ -142,7 +141,6 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
     compute_deltas(deltas, beta, g->n);
 
     int iter = 1;
-    int frontier_size = 0;
     int *distances = (int *) malloc(g->n * sizeof(int));
     memset(distances, UNVISITED, g->n * sizeof(int));
     int *ball_ids = (int *) calloc(g->n, sizeof(int));
@@ -210,7 +208,7 @@ void ball_decomp_bottom_up_par(Graph g, float beta, std::vector<std::unordered_s
  *     collection - list of balls
  *     radii - list of radii
  */
-void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_set<int>> &collection,
+void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_set<int>> &collection,
     std::vector<int> &radii) {
     auto start_time = std::chrono::steady_clock::now();
 
@@ -224,16 +222,12 @@ void ball_decomp_top_down_par(Graph g, float beta, std::vector<std::unordered_se
     init_vertex_set(frontier, g->n);
     init_vertex_set(next_frontier, g->n);
 
-    int num_threads = omp_get_num_threads();
-
     int *ball_ids = (int *) calloc(g->n, sizeof(int));
     int iter = 1;
     std::unordered_set<int> unvisited;
     // Mark all vertices as unvisited
     for (int vid = 0; vid < g->n; ++vid) {
         unvisited.insert(vid);
-        if (deltas[vid] < 1) {
-        }
     }
     std::vector<int> owner = std::vector<int>(g->n, NOT_OWNED);
     while (unvisited.size() > 0) {
