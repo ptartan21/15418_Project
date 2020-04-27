@@ -82,6 +82,13 @@ def export_internet_graph(n):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_internet_graph_batch(n, batch_size, prefix):
+    for i in range(batch_size):
+        print("Generating graph %d" % i)
+        G = nx.random_internet_as_graph(n)
+        gname = prefix + "random_internet_%d_%d" % (n, i)
+        export_graph(G, gname + ".txt")
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -102,7 +109,5 @@ if __name__ == "__main__":
         #     joint_deg_seq.append((deg, triangle_deg))
         # G, gname = export_random_clustered_graph(joint_deg_seq)
         # export_random_tree(100000)
-        G, gname = export_internet_graph(1000)
-        nx.draw(G, with_labels = True)
-        plt.savefig(gname)
-        plt.show()
+        # export_internet_graph_batch(10000, 50, "../graphs/random_internet/")
+        export_random_graph(50, 150)

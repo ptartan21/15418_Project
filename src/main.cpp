@@ -70,10 +70,10 @@ void inline bfs_top_down_seq_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_top_down_seq(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
@@ -82,10 +82,10 @@ void inline bfs_top_down_par_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_top_down_par(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
@@ -94,6 +94,10 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_bottom_up_seq(g, 0, distances);
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
@@ -102,6 +106,10 @@ void inline bfs_bottom_up_par_wrapper(Graph &g) {
     int n = g->n;
     int *distances = (int *) calloc(n, sizeof(int));
     bfs_bottom_up_par(g, 0, distances);
+    for (int i = 0; i < g->n; ++i) {
+        std::cout << distances[i] << " ";
+    }
+    std::cout << std::endl;
     free(distances);
 }
 
@@ -141,13 +149,13 @@ int main(int argc, char **argv) {
     omp_set_num_threads(num_threads);
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
-    ball_decomp_seq_wrapper(g, 0.25);
-    ball_decomp_bottom_up_par_wrapper(g, 0.5);
-    ball_decomp_top_down_par_wrapper(g, 0.5);
-    // bfs_bottom_up_seq_wrapper(g);
-    // bfs_bottom_up_par_wrapper(g);
-    // bfs_top_down_seq_wrapper(g);
-    // bfs_top_down_par_wrapper(g);
+    // ball_decomp_seq_wrapper(g, 0.25);
+    // ball_decomp_bottom_up_par_wrapper(g, 0.5);
+    // ball_decomp_top_down_par_wrapper(g, 0.5);
+    bfs_bottom_up_seq_wrapper(g);
+    bfs_bottom_up_par_wrapper(g);
+    bfs_top_down_seq_wrapper(g);
+    bfs_top_down_par_wrapper(g);
 
     free(g);
 }

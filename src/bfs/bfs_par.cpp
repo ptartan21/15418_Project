@@ -16,8 +16,7 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
     // vid - vertex ID
     // eid - edge ID
     // nid - neighbor ID
-    int local_num_vertices;
-    #pragma omp parallel private(local_num_vertices)
+    #pragma omp parallel
     {
         vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
         init_vertex_set(local_frontier, g->n);
