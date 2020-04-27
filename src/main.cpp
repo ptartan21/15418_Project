@@ -37,6 +37,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
     int off = 0;
     int pos = 0;
     int cur = -1;
+    int num_edges_stored = 0;
     while (std::getline(source, line)) {
         std::istringstream iss(line);
         iss >> cur;
@@ -44,9 +45,10 @@ void inline load_graph(std::string graph_in, Graph &g) {
         while (iss >> v) {
             g->out_edge_list[pos++] = v;
             in_mapper[v].push_back(cur);
+            num_edges_stored++;
         }
     }
-    g->out_offsets[n] = 2*m;
+    g->out_offsets[n] = num_edges_stored;
 
     // populating the in-neighbor portion of the graph
     g->in_offsets   = (int *) calloc(n + 1, sizeof(int));
@@ -61,6 +63,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
             g->in_edge_list[pos++] = in_nbor;
         }
     }
+    g->in_offsets[n] = num_edges_stored;
     std::cout << std::endl;
     source.close();
     std::cout << "Succesfully Loaded Graph" << std::endl;
