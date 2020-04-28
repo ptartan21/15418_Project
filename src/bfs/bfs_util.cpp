@@ -11,11 +11,6 @@ void inline reset_frontier(vertex_set *frontier) {
 /*
  * Swap the frontier pointers.
  */
-// void inline advance_frontier(vertex_set **frontier_ptr, vertex_set **next_frontier_ptr) {
-//     vertex_set *temp = *frontier_ptr;
-//     *frontier_ptr = *next_frontier_ptr;
-//     *next_frontier_ptr = temp;
-// }
 void inline advance_frontier(vertex_set *frontier, vertex_set *next_frontier) {
     vertex_set temp = *frontier;
     *frontier = *next_frontier;
