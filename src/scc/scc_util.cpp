@@ -1,6 +1,23 @@
-#include "bfs.h"
+#include "../bfs/bfs.h"
+#include <cstdlib>
 #include <vector>
 #include <unordered_set>
+
+// Constructing the reverse graph (flipping the direction of each edge) of g
+Graph reverse_graph(const Graph &g) {
+    Graph rev_g = (graph_t *) malloc(sizeof(graph_t));
+    rev_g->out_offsets    = (int *) calloc(g->n + 1, sizeof(int));
+    rev_g->out_edge_lists = (int *) calloc(2 * g->m, sizeof(int));
+    rev_g->in_offsets     = (int *) calloc(g->n + 1, sizeof(int));
+    rev_g->in_edge_lists  = (int *) calloc(2 * g->m, sizeof(int));
+    rev_g->n = g->n;
+    rev_g->m = g->m;
+    std::copy(g->out_offsets.begin(), g->out_offsets.end(), rev->g->in_offsets.begin());
+    std::copy(g->in_offsets.begin() , g->in_offsets.end() , rev->g->out_offsets.begin());
+    std::copy(g->out_edge_lists.begin(), g->out_edge_lists.end(), rev->g->in_edge_lists.begin());
+    std::copy(g->in_edge_lists.begin() , g->in_edge_lists.end() , rev->g->out_edge_lists.begin());
+    return rev_g;
+}
 
 /***** SEQUENTIAL *****/
 /*
