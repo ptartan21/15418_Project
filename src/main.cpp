@@ -147,21 +147,39 @@ void inline ball_decomp_bottom_up_par_wrapper(Graph g, float beta) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Bottom-Up, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_bottom_up_par(g, beta, collection, radii);
+    std::unordered_map<std::string, double> metrics;
+    ball_decomp_bottom_up_par(g, beta, collection, radii, metrics);
+
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
 }
 
 void inline ball_decomp_top_down_par_wrapper(Graph g, float beta) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Top-Down, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_top_down_par(g, beta, collection, radii);
+    std::unordered_map<std::string, double> metrics;
+    ball_decomp_top_down_par(g, beta, collection, radii, metrics);
+
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
 }
 
 void inline ball_decomp_hybrid_wrapper(Graph g, float beta) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Hybrid, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_hybrid(g, beta, collection, radii);
+    std::unordered_map<std::string, double> metrics;
+    ball_decomp_hybrid(g, beta, collection, radii, metrics);
+
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile << std::to_string(runtime) << "\n";
 }
 
 void inline bfs_correctness_wrapper(Graph &g) {
@@ -189,8 +207,8 @@ int main(int argc, char **argv) {
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    ball_decomp_bottom_up_par_wrapper(g, 0.5);
     ball_decomp_top_down_par_wrapper(g, 0.5);
+    ball_decomp_bottom_up_par_wrapper(g, 0.5);
     ball_decomp_hybrid_wrapper(g, 0.5);
     // bfs_bottom_up_seq_wrapper(g);
     // bfs_bottom_up_par_wrapper(g);
@@ -200,4 +218,6 @@ int main(int argc, char **argv) {
     // bfs_correctness_wrapper(g);
 
     free(g);
+
+    return 0;
 }

@@ -62,7 +62,7 @@ double get_avg_isoperimetric_num(Graph &g, int *ball_ids) {
  *     radii - list of radii
  */
 void ball_decomp_bottom_up_par(Graph g, double beta, std::vector<std::unordered_set<int>> &collection,
-    std::vector<int> &radii) {
+    std::vector<int> &radii, std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
 
     // Sample deltas from Exp(beta)
@@ -121,9 +121,14 @@ void ball_decomp_bottom_up_par(Graph g, double beta, std::vector<std::unordered_
     }
 
     auto end_time = std::chrono::steady_clock::now();
+    std::cout << "Iterations: " << iter << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
+
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
+    metrics.insert(std::make_pair("iterations", (double) (iter-1)));
 
     free(distances);
     free(ball_ids);
@@ -138,7 +143,7 @@ void ball_decomp_bottom_up_par(Graph g, double beta, std::vector<std::unordered_
  *     radii - list of radii
  */
 void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_set<int>> &collection,
-    std::vector<int> &radii) {
+    std::vector<int> &radii, std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
 
     // Sample deltas from Exp(beta)
@@ -235,9 +240,14 @@ void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_s
 
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << "Iterations: " << iter << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
+    
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
+    metrics.insert(std::make_pair("iterations", (double) (iter-1)));
 
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
