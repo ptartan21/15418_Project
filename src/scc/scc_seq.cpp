@@ -1,7 +1,5 @@
 // Sequential Implementation for Finding Strongly Connected Components
-#include <unordered_set>
-#include <algorithm>
-#include "../util/graph.h"
+#include "scc_util.cpp"
 
 std::unordered_set<int> intersection(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
     // implement set intersection
@@ -18,12 +16,14 @@ std::unordered_set<int> forward_reachability(/* */, int vi) {
     return fr_vertices;
 }
 
+// flip the edges in the graph
 std::unordered_set<int> backward_reachability(/* */, int vi) {
     std::unordered_set<int> bw_vertices;
     // implement a symmetrical BFS to find all backward reachable vertices in S from vi
     return bw_vertices;
 }
 
+// stores all strongly connected components into all_scc
 void compute_scc(std::vector<std::unordered_set<int>> &all_scc, Graph &g) {
     // initialize V
     for (int vi = 0; vi < g->n; ++vi) {
