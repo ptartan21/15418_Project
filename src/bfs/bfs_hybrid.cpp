@@ -60,7 +60,8 @@ void inline bfs_bottom_up_step(Graph g, int &frontier_size, int iter, int *dista
 }
 
 // Assume undirected graph
-void bfs_hybrid(Graph g, int source, int *distances) {
+void bfs_hybrid(Graph g, int source, int *distances,
+    std::unordered_map<std::string, double> &metrics) {
     double alpha = 10.0;
     double beta = 10.0;
     auto start_time = std::chrono::steady_clock::now();
@@ -131,4 +132,10 @@ void bfs_hybrid(Graph g, int source, int *distances) {
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "\n";
+
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
+
+    free_vertex_set(frontier);
+    free_vertex_set(next_frontier);
 }

@@ -48,7 +48,8 @@ void inline construct_frontier_top_down_par(Graph g, vertex_set *frontier,
  *     source - starting point for the BFS
  *     distances - output; distances from source
  */
-void bfs_top_down_par(Graph g, int source, int *distances) {
+void bfs_top_down_par(Graph g, int source, int *distances, 
+    std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
     // Initialize frontiers
     vertex_set *frontier = (vertex_set *) malloc(sizeof(vertex_set));
@@ -71,6 +72,10 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "\n";
+
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
+    
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
 }
@@ -113,7 +118,8 @@ void bfs_top_down_par(Graph g, int source, int *distances) {
  *     source - starting point for the BFS
  *     distances - output; distances from source
  */
-void bfs_bottom_up_par(Graph g, int source, int *distances) {
+void bfs_bottom_up_par(Graph g, int source, int *distances,
+    std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
     int iter = 1;
     memset(distances, UNVISITED, g->n*sizeof(int));
@@ -127,4 +133,7 @@ void bfs_bottom_up_par(Graph g, int source, int *distances) {
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     std::cout << "\n";
+
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
 }

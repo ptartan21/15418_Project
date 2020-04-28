@@ -16,7 +16,9 @@
 #include "ball_growing/ball_growing_hybrid.cpp"
 
 /*
- * Populate g
+ * Populate g from the given input file.
+ *     graph_in - input filename
+ *     g - graph
  */
 void inline load_graph(std::string graph_in, Graph &g) {
     int n, m;
@@ -64,69 +66,83 @@ void inline load_graph(std::string graph_in, Graph &g) {
         }
     }
     g->in_offsets[n] = num_edges_stored;
-    std::cout << std::endl;
     source.close();
     std::cout << "Succesfully Loaded Graph" << std::endl;
 
 }
 
-void inline bfs_top_down_seq_wrapper(Graph &g) {
+void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Top Down BFS (Sequential)" << std::endl;
-    int n = g->n;
-    int *distances = (int *) calloc(n, sizeof(int));
-    bfs_top_down_seq(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    int *distances = (int *) calloc(g->n, sizeof(int));
+    std::unordered_map<std::string, double> metrics;
+    bfs_top_down_seq(g, 0, distances, metrics);
+
+    // Write metrics to outfile
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
+
     free(distances);
 }
 
-void inline bfs_top_down_par_wrapper(Graph &g) {
+void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Top Down BFS (Parallel)" << std::endl;
-    int n = g->n;
-    int *distances = (int *) calloc(n, sizeof(int));
-    bfs_top_down_par(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    int *distances = (int *) calloc(g->n, sizeof(int));
+    std::unordered_map<std::string, double> metrics;
+    bfs_top_down_par(g, 0, distances, metrics);
+
+    // Write metrics to outfile
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
+
     free(distances);
 }
 
-void inline bfs_bottom_up_seq_wrapper(Graph &g) {
+void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Sequential)" << std::endl;
-    int n = g->n;
-    int *distances = (int *) calloc(n, sizeof(int));
-    bfs_bottom_up_seq(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    int *distances = (int *) calloc(g->n, sizeof(int));
+    std::unordered_map<std::string, double> metrics;
+    bfs_bottom_up_seq(g, 0, distances, metrics);
+
+    // Write metrics to outfile
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
+
     free(distances);
 }
 
-void inline bfs_bottom_up_par_wrapper(Graph &g) {
+void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Parallel)" << std::endl;
-    int n = g->n;
-    int *distances = (int *) calloc(n, sizeof(int));
-    bfs_bottom_up_par(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    int *distances = (int *) calloc(g->n, sizeof(int));
+    std::unordered_map<std::string, double> metrics;
+    bfs_bottom_up_par(g, 0, distances, metrics);
+
+    // Write metrics to outfile
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
+
     free(distances);
 }
 
-void inline bfs_hybrid_wrapper(Graph &g) {
+void inline bfs_hybrid_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Hybrid BFS (Parallel)" << std::endl;
-    int n = g->n;
-    int *distances = (int *) calloc(n, sizeof(int));
-    bfs_hybrid(g, 0, distances);
-    // for (int i = 0; i < g->n; ++i) {
-    //     std::cout << distances[i] << " ";
-    // }
-    // std::cout << std::endl;
+    int *distances = (int *) calloc(g->n, sizeof(int));
+    std::unordered_map<std::string, double> metrics;
+    bfs_hybrid(g, 0, distances, metrics);
+
+    // Write metrics to outfile
+    double runtime = metrics.find("runtime")->second;
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << "\n";
+
     free(distances);
 }
 
@@ -135,50 +151,47 @@ void inline ball_decomp_seq_wrapper(Graph g, float beta) {
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     ball_decomp_seq(g, beta, collection, radii);
-    // for (int i = 0; i < radii.size(); ++i) {
-    //     for (auto &vid : collection[i]) {
-    //         std::cout << vid << " ";
-    //     }
-    //     std::cout << "\nRadius: " << radii[i] << "\n\n";
-    // }
 }
 
-void inline ball_decomp_bottom_up_par_wrapper(Graph g, float beta) {
+void inline ball_decomp_bottom_up_par_wrapper(Graph g, float beta, std::string out_filename) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Bottom-Up, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
     ball_decomp_bottom_up_par(g, beta, collection, radii, metrics);
 
+    // Write metrics to outfile
     double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
-    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
 }
 
-void inline ball_decomp_top_down_par_wrapper(Graph g, float beta) {
+void inline ball_decomp_top_down_par_wrapper(Graph g, float beta, std::string out_filename) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Top-Down, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
     ball_decomp_top_down_par(g, beta, collection, radii, metrics);
 
+    // Write metrics to outfile
     double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
-    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
 }
 
-void inline ball_decomp_hybrid_wrapper(Graph g, float beta) {
+void inline ball_decomp_hybrid_wrapper(Graph g, float beta, std::string out_filename) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Hybrid, Parallel)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
     ball_decomp_hybrid(g, beta, collection, radii, metrics);
 
+    // Write metrics to outfile
     double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
-    outfile.open("results/ball_growing/bg.txt", std::ios_base::app);
+    outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << "\n";
 }
 
@@ -186,8 +199,10 @@ void inline bfs_correctness_wrapper(Graph &g) {
     int n = g->n;
     int *distances_ref = (int *) calloc(n, sizeof(int));
     int *distances_test = (int *) calloc(n, sizeof(int));
-    bfs_top_down_seq(g, 0, distances_ref);
-    bfs_hybrid(g, 0, distances_test);
+    std::unordered_map<std::string, double> metrics_ref;
+    std::unordered_map<std::string, double> metrics_test;
+    bfs_top_down_seq(g, 0, distances_ref, metrics_ref);
+    bfs_hybrid(g, 0, distances_test, metrics_test);
     for (int i = 0; i < n; ++i) {
         if (distances_ref[i] != distances_test[i]) {
             fprintf(stderr, "Mismatch at %d\n", i);
@@ -207,14 +222,14 @@ int main(int argc, char **argv) {
     std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    ball_decomp_top_down_par_wrapper(g, 0.5);
-    ball_decomp_bottom_up_par_wrapper(g, 0.5);
-    ball_decomp_hybrid_wrapper(g, 0.5);
-    // bfs_bottom_up_seq_wrapper(g);
-    // bfs_bottom_up_par_wrapper(g);
-    // bfs_top_down_seq_wrapper(g);
-    // bfs_top_down_par_wrapper(g);
-    // bfs_hybrid_wrapper(g);
+    // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    bfs_top_down_seq_wrapper(g, "results/bfs/bfs.txt");
+    bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
+    bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
+    bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
+    bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
     // bfs_correctness_wrapper(g);
 
     free(g);
