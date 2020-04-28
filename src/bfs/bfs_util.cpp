@@ -1,6 +1,3 @@
-#include "bfs.h"
-
-
 /*
  * Resets the frontier by setting its number of vertices to zero.
  */
