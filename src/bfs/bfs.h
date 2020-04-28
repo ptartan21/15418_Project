@@ -6,6 +6,8 @@
 #include <cstring>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unordered_map>
+#include <string>
 
 #define UNVISITED (-1)
 #define TOP_DOWN 1
