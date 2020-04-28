@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <iomanip>
+#include <limits>
 
 #include "util/graph.h"
 #include "bfs/bfs_seq.cpp"
@@ -75,10 +76,15 @@ void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Top Down BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
-    bfs_top_down_seq(g, 0, distances, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        bfs_top_down_seq(g, 0, distances, metrics);
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
@@ -90,10 +96,15 @@ void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Top Down BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
-    bfs_top_down_par(g, 0, distances, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        bfs_top_down_par(g, 0, distances, metrics);
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
@@ -105,10 +116,15 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
-    bfs_bottom_up_seq(g, 0, distances, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        bfs_bottom_up_seq(g, 0, distances, metrics);
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
@@ -120,10 +136,15 @@ void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
-    bfs_bottom_up_par(g, 0, distances, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        bfs_bottom_up_par(g, 0, distances, metrics);
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
@@ -135,10 +156,15 @@ void inline bfs_hybrid_wrapper(Graph &g, std::string out_filename) {
     std::cout << "Hybrid BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
-    bfs_hybrid(g, 0, distances, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        bfs_hybrid(g, 0, distances, metrics);
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << "\n";
