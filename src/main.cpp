@@ -15,6 +15,8 @@
 #include "ball_growing/ball_growing_seq.cpp"
 #include "ball_growing/ball_growing_par.cpp"
 #include "ball_growing/ball_growing_hybrid.cpp"
+#include "le_lists/le_lists_seq.cpp"
+#include "le_lists/le_lists_par.cpp"
 
 /*
  * Populate g from the given input file.
@@ -72,7 +74,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
 
 }
 
-void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_top_down_seq_wrapper(Graph g, std::string out_filename) {
     std::cout << "Top Down BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -93,7 +95,7 @@ void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_top_down_par_wrapper(Graph g, std::string out_filename) {
     std::cout << "Top Down BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -114,7 +116,7 @@ void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_bottom_up_seq_wrapper(Graph g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -135,7 +137,7 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_bottom_up_par_wrapper(Graph g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -156,7 +158,7 @@ void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_hybrid_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_hybrid_wrapper(Graph g, std::string out_filename) {
     std::cout << "Hybrid BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -226,7 +228,7 @@ void inline ball_decomp_hybrid_wrapper(Graph g, float beta, std::string out_file
     outfile << std::to_string(runtime) << "\n";
 }
 
-void inline bfs_correctness_wrapper(Graph &g) {
+void inline bfs_correctness_wrapper(Graph g) {
     int n = g->n;
     int *distances_ref = (int *) calloc(n, sizeof(int));
     int *distances_test = (int *) calloc(n, sizeof(int));
@@ -241,6 +243,36 @@ void inline bfs_correctness_wrapper(Graph &g) {
     }
     free(distances_ref);
     free(distances_test);
+}
+
+void inline le_lists_seq_wrapper(Graph g) {
+    std::cout << "LE-Lists (Seq)" << std::endl;
+    std::vector<std::vector<int>> L_v;
+    std::vector<std::vector<int>> L_d;
+    std::unordered_map<std::string, double> metrics;
+    double runtime = std::numeric_limits<double>::max();
+    for (int i = 0; i < 3; ++i) {
+        le_lists_seq(g, L_v, L_d, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
+
+    
+
+    for (int vid = 0; vid < g->n; ++vid) {
+        std::cout << "LE-List for vertex " << vid << std::endl;
+        std::vector<int> L_vid_v = L_v[vid];
+        std::vector<int> L_vid_d = L_d[vid];
+        for (int j = 0; j < L_vid_v.size(); ++j) {
+            int nid = L_vid_v[j];
+            std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << std::to_string(runtime) << std::endl;
+
 }
 
 int main(int argc, char **argv) {
@@ -260,7 +292,7 @@ int main(int argc, char **argv) {
     // bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
     // bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
     // bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
-    bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
+    // bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
 
     // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
     //     std::string num_threads_str = std::to_string(num_threads);
@@ -280,6 +312,8 @@ int main(int argc, char **argv) {
     // }
 
     // bfs_correctness_wrapper(g);
+
+    le_lists_seq_wrapper(g);
 
     free(g);
 
