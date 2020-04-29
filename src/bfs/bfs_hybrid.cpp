@@ -126,6 +126,13 @@ void bfs_hybrid(Graph g, int source, int *distances,
                 bfs_bottom_up_step(g, frontier_size, iter, distances);
             }
         }
+        std::string step;
+        if (last_step == TOP_DOWN) {
+            step = "top down";
+        } else {
+            step = "bottom up";
+        }
+        std::cout << "Iteration " << iter << ": " << step << std::endl;
         iter++;
     }
     auto end_time = std::chrono::steady_clock::now();

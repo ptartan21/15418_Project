@@ -23,6 +23,7 @@ void inline bg_top_down_step(Graph &g, vertex_set *frontier, vertex_set *next_fr
             num_frontier_edges += g->out_offsets[vid+1] - g->out_offsets[vid];
         }
     }
+
     // Mark those vertices as unvisited (must do after to not modify set while iterating)
     for (int i = 0; i < next_frontier->num_vertices; ++i) {
         int vid = next_frontier->vertices[i];
@@ -44,7 +45,8 @@ void inline bg_top_down_step(Graph &g, vertex_set *frontier, vertex_set *next_fr
                 int nid = g->out_edge_list[eid];
                 #pragma omp critical
                 {
-                    if (unvisited.find(nid) != unvisited.end()) {
+                    // if (unvisited.find(nid) != unvisited.end()) {
+                    if (is_unvisited(nid, distances)) {
                         int ovid = owner[nid];
                         // vid is first to reach nid
                         if (ovid == NOT_OWNED) {
@@ -237,4 +239,3 @@ void ball_decomp_hybrid(Graph g, double beta,
     free(distances);
     free(ball_ids);
 }
-

@@ -80,6 +80,7 @@ void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
     // Run 3 times and take min runtime
     for (int i = 0; i < 3; ++i) {
         bfs_top_down_seq(g, 0, distances, metrics);
+        #pragma omp barrier
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
@@ -100,6 +101,7 @@ void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
     // Run 3 times and take min runtime
     for (int i = 0; i < 3; ++i) {
         bfs_top_down_par(g, 0, distances, metrics);
+        #pragma omp barrier
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
@@ -120,6 +122,7 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
     // Run 3 times and take min runtime
     for (int i = 0; i < 3; ++i) {
         bfs_bottom_up_seq(g, 0, distances, metrics);
+        #pragma omp barrier
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
@@ -140,6 +143,7 @@ void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
     // Run 3 times and take min runtime
     for (int i = 0; i < 3; ++i) {
         bfs_bottom_up_par(g, 0, distances, metrics);
+        #pragma omp barrier
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
@@ -160,6 +164,7 @@ void inline bfs_hybrid_wrapper(Graph &g, std::string out_filename) {
     // Run 3 times and take min runtime
     for (int i = 0; i < 3; ++i) {
         bfs_hybrid(g, 0, distances, metrics);
+        #pragma omp barrier
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
@@ -243,19 +248,37 @@ int main(int argc, char **argv) {
     Graph g = (graph_t *) malloc(sizeof(graph_t));
     load_graph(graph_in, g);
 
-    int num_threads = 8;
-    omp_set_num_threads(num_threads);
-    std::cout << "Number of Threads: " << num_threads << std::endl;
+    // int num_threads = 8;
+    // omp_set_num_threads(num_threads);
+    // std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
     // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    bfs_top_down_seq_wrapper(g, "results/bfs/bfs.txt");
-    bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
-    bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
-    bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
+    // bfs_top_down_seq_wrapper(g, "results/bfs/bfs.txt");
+    // bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
+    // bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
+    // bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
     bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
+
+    // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
+    //     std::string num_threads_str = std::to_string(num_threads);
+    //     omp_set_num_threads(num_threads);
+    //     std::cout << "Number of Threads: " << num_threads << std::endl;
+    //     std::string out_filename = "results/bfs/bfs_powerlaw2_" + num_threads_str + ".txt";
+    //     bfs_top_down_seq_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_top_down_par_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_bottom_up_seq_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_bottom_up_par_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_hybrid_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    // }
+
     // bfs_correctness_wrapper(g);
 
     free(g);

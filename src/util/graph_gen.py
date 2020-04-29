@@ -41,12 +41,19 @@ def export_random_graph(n, m, directed=False):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_random_graph_batch(n, m, batch_size, prefix, directed=False):
+    for i in range(batch_size):
+        print("Generating graph %d" % i)
+        G = nx.gnm_random_graph(n, m, directed)
+        gname = prefix + "random_graph_%d_%d_%d" % (n, m, i)
+        export_graph(G, gname + ".txt")
+
 # Generates random undirected graph with power law degree distribution and
 # approximate average clustering.
 #     n - number of vertices
 #     m - number of edges
 #     p - probability of adding a triangle after adding a random edge
-def export_power_law_graph(n, m, p):
+def export_powerlaw_graph(n, m, p):
     G = nx.powerlaw_cluster_graph(n, m, p)
     gname = "powerlaw_%d_%s" % (n, m) 
     export_graph(G, gname + ".txt")
@@ -89,6 +96,23 @@ def export_internet_graph_batch(n, batch_size, prefix):
         gname = prefix + "random_internet_%d_%d" % (n, i)
         export_graph(G, gname + ".txt")
 
+# 
+#     n - number of vertices
+#     m - number of random edges to add per vertex
+#     p - probability of adding a triangle after adding a random edge
+def export_powerlaw_cluster_graph(n, m, p):
+    G = nx.powerlaw_cluster_graph(n, m, p)
+    gname = "random_powerlaw_cluster_%d_%d_%d" % (n, m, p)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
+def export_powerlaw_cluster_graph_batch(n, m, p, batch_size, prefix):
+    for i in range(batch_size):
+        print("Generating graph %d" % i)
+        G = nx.powerlaw_cluster_graph(n, m, p)
+        gname = prefix + "random_powerlaw_cluster_%d_%d_%s_%d" % (n, m, str(p), i)
+        export_graph(G, gname + ".txt")
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -110,4 +134,9 @@ if __name__ == "__main__":
         # G, gname = export_random_clustered_graph(joint_deg_seq)
         # export_random_tree(100000)
         # export_internet_graph_batch(10000, 50, "../graphs/random_internet/")
-        export_random_graph(50, 150)
+        # export_random_graph(50, 150)
+        # export_powerlaw_cluster_graph_batch(20000, 5, 0.25, 50, "../graphs/powerlaw_cluster/20000_5_0.25/")
+        # export_powerlaw_cluster_graph(20000, 5, 0.25)
+        # export_erdos_renyi_graph(20000, 0.25)
+        # export_random_graph(20000, 40000)
+        export_random_graph_batch(20000, 40000, 50, "../graphs/random_graph/20000_40000/")
