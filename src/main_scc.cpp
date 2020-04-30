@@ -17,6 +17,7 @@
 #include "ball_growing/ball_growing_hybrid.cpp"
 #include "scc/scc_seq.cpp"
 #include "scc/scc_par.cpp"
+#include "scc/scc_hybrid.cpp"
 
 /*
  * Populate g from the given input file.
@@ -269,6 +270,12 @@ void inline scc_par_wrapper(Graph &g, int method) {
     }
 }
 
+void inline scc_hybrid_wrapper(Graph &g) {
+    std::vector<std::unordered_set<int>> all_scc;
+    std::cout << "SCC Hybrid BFS" << std::endl;
+    compute_scc_hybrid(all_scc, g);
+}
+
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = (graph_t *) malloc(sizeof(graph_t));
@@ -311,6 +318,7 @@ int main(int argc, char **argv) {
     scc_seq_wrapper(g, 1);
     scc_par_wrapper(g, 0);
     scc_par_wrapper(g, 1);
+    scc_hybrid_wrapper(g);
     free(g);
 
     return 0;
