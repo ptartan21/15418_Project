@@ -15,6 +15,9 @@
 #include "ball_growing/ball_growing_seq.cpp"
 #include "ball_growing/ball_growing_par.cpp"
 #include "ball_growing/ball_growing_hybrid.cpp"
+#include "scc/scc_seq.cpp"
+#include "scc/scc_par.cpp"
+#include "scc/scc_hybrid.cpp"
 #include "le_lists/le_lists_seq.cpp"
 #include "le_lists/le_lists_par.cpp"
 
@@ -245,6 +248,36 @@ void inline bfs_correctness_wrapper(Graph g) {
     free(distances_test);
 }
 
+// 0 == bottom up seq, 1 == top down seq
+void inline scc_seq_wrapper(Graph &g, int method) {
+    std::vector<std::unordered_set<int>> all_scc;
+    if (method == 0) {
+        std::cout << "SCC Bottom Up BFS (Sequential)" << std::endl;
+        compute_scc_seq(all_scc, g, 0);
+    } else if (method == 1) {
+        std::cout << "SCC Top Down BFS (Sequential)" << std::endl;
+        compute_scc_seq(all_scc, g, 1);
+    }
+}
+
+// 0 == bottom up seq, 1 == top down seq
+void inline scc_par_wrapper(Graph &g, int method) {
+    std::vector<std::unordered_set<int>> all_scc;
+    if (method == 0) {
+        std::cout << "SCC Bottom Up BFS (Parallel)" << std::endl;
+        compute_scc_par(all_scc, g, 0);
+    } else if (method == 1) {
+        std::cout << "SCC Top Down BFS (Parallel)" << std::endl;
+        compute_scc_par(all_scc, g, 1);
+    }
+}
+
+void inline scc_hybrid_wrapper(Graph &g) {
+    std::vector<std::unordered_set<int>> all_scc;
+    std::cout << "SCC Hybrid BFS" << std::endl;
+    compute_scc_hybrid(all_scc, g);
+}
+
 void inline le_lists_seq_wrapper(Graph g) {
     std::cout << "LE-Lists (Seq)" << std::endl;
     std::vector<std::vector<int>> L_v;
@@ -258,7 +291,7 @@ void inline le_lists_seq_wrapper(Graph g) {
         metrics.clear();
     }
 
-    
+
 
     // for (int vid = 0; vid < g->n; ++vid) {
     //     std::cout << "LE-List for vertex " << vid << std::endl;
@@ -288,7 +321,7 @@ void inline le_lists_par_wrapper(Graph g) {
         metrics.clear();
     }
 
-    
+
 
     // for (int vid = 0; vid < g->n; ++vid) {
     //     std::cout << "LE-List for vertex " << vid << std::endl;
@@ -338,6 +371,11 @@ int main(int argc, char **argv) {
 
     // bfs_correctness_wrapper(g);
 
+    // scc_seq_wrapper(g, 0);
+    // scc_seq_wrapper(g, 1);
+    // scc_par_wrapper(g, 0);
+    // scc_par_wrapper(g, 1);
+    // scc_hybrid_wrapper(g);
     // le_lists_seq_wrapper(g);
     // le_lists_par_wrapper(g);
 
