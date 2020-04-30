@@ -6,7 +6,7 @@
 
 
 void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set *next_frontier, 
-    int *distances, int &num_frontier_edges, int &num_edges_checked, int *deltas, vertex_set *S, int iter) {
+    int *distances, int &num_frontier_edges, int &num_edges_checked, int *deltas, vertex_set *S, unsigned char *in_S, int iter) {
             
     int local_num_frontier_edges = 0;
     int local_num_edges_checked = 0;
@@ -28,6 +28,7 @@ void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set
                         local_frontier->vertices[local_frontier->num_vertices++] = nid;
                         local_num_frontier_edges += g->out_offsets[nid+1] - g->out_offsets[nid];
                         local_S->vertices[local_S->num_vertices++] = nid;
+                        // in_S[nid] = 1;
                     }
 
                 }
@@ -49,7 +50,7 @@ void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set
     }
 }
 
-void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, int *distances, int* deltas, vertex_set *S) {
+void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, int *distances, int* deltas, vertex_set *S, unsigned char *in_S) {
     int shared_frontier_size = 0;
 
     #pragma omp parallel
@@ -65,10 +66,11 @@ void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, i
                         distances[vid] = iter;
                         if (distances[vid] < deltas[vid]) {
                             shared_frontier_size++;
-                            #pragma omp critical
-                            {
-                                S->vertices[S->num_vertices++] = vid;
-                            }
+                            // #pragma omp critical
+                            // {
+                            //     S->vertices[S->num_vertices++] = vid;
+                            // }
+                            in_S[vid] = 1;
                             break;
                         }
                     }
@@ -79,12 +81,13 @@ void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, i
     frontier_size = shared_frontier_size;
 }
 
-void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S, int *distances) {
-    double alpha = 20.0;
-    double gamma = 5.0;
+void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S, int *distances, unsigned char *in_S) {
+    double alpha = 10.0;
+    double gamma = 10.0;
     
     S->num_vertices = 0;
     memset(distances, UNVISITED, g->n*sizeof(int));
+    memset(in_S, 0, g->n*sizeof(unsigned char));
 
     vertex_set *frontier = (vertex_set *) malloc(sizeof(vertex_set));
     vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
@@ -110,11 +113,11 @@ void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S,
             should_switch = false;
             if (should_switch) {
                 last_step = BOTTOM_UP;
-                le_lists_bfs_bottom_up_step(g, frontier_size, iter, distances, deltas, S);
+                le_lists_bfs_bottom_up_step(g, frontier_size, iter, distances, deltas, S, in_S);
             } else {
                 reset_frontier(next_frontier);
                 int num_edges_checked = 0;
-                le_lists_bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked, deltas, S, iter);
+                le_lists_bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked, deltas, S, in_S, iter);
                 num_unvisited_edges -= num_edges_checked;
                 advance_frontier(frontier, next_frontier);
                 frontier_size = frontier->num_vertices;
@@ -136,12 +139,12 @@ void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S,
                 }
                 reset_frontier(next_frontier);
                 int num_edges_checked = 0;
-                le_lists_bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked, deltas, S, iter);
+                le_lists_bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked, deltas, S, in_S, iter);
                 num_unvisited_edges -= num_edges_checked;
                 advance_frontier(frontier, next_frontier);
                 frontier_size = frontier->num_vertices;
             } else {
-                le_lists_bfs_bottom_up_step(g, frontier_size, iter, distances, deltas, S);
+                le_lists_bfs_bottom_up_step(g, frontier_size, iter, distances, deltas, S, in_S);
             }
         }
         iter++;
@@ -166,15 +169,30 @@ void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
     vertex_set *S = (vertex_set *) malloc(sizeof(vertex_set));
     init_vertex_set(S, g->n);
     int *distances = (int *) malloc(g->n*sizeof(int));
+    unsigned char *in_S = (unsigned char *) calloc(g->n, sizeof(unsigned char));
 
     for (int vid = 0; vid < g->n; ++vid) {
-        le_lists_bfs_hybrid(g, vid, deltas, S, distances);
-        for (int i = 0; i < S->num_vertices; ++i) {            
-            int u = S->vertices[i];
-            deltas[u] = distances[u];
-            L_v[u].push_back(vid);
-            L_d[u].push_back(distances[u]);
+        le_lists_bfs_hybrid(g, vid, deltas, S, distances, in_S);
+        #pragma omp parallel
+        {
+            #pragma omp for schedule(static)
+            for (int i = 0; i < S->num_vertices; ++i) {            
+                int u = S->vertices[i];
+                deltas[u] = distances[u];
+                L_v[u].push_back(vid);
+                L_d[u].push_back(distances[u]);
+            }
+            
+            // #pragma omp for schedule(static)
+            // for (int u = 0; u < g->n; ++u) {
+            //     if (in_S[u]) {
+            //         deltas[u] = distances[u];
+            //         L_v[u].push_back(vid);
+            //         L_d[u].push_back(distances[u]);
+            //     }
+            // }
         }
+        
 
     }
     auto end_time = std::chrono::steady_clock::now();
@@ -184,4 +202,5 @@ void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
     free(deltas);
     free_vertex_set(S);
     free(distances);
+    free(in_S);
 }
