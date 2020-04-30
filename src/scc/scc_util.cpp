@@ -297,4 +297,129 @@ std::unordered_set<int> bfs_bottom_up_par(Graph &g, std::unordered_set<int> &S, 
     return reach;
 }
 
+/***** HYBRID *****/
 
+void inline bfs_top_down_step(Graph &g, std::unordered_set<int> &S, vertex_set *frontier, vertex_set *next_frontier, std::vector<int> &distances, int &num_frontier_edges, int &num_edges_checked) {
+    int local_num_frontier_edges = 0;
+    int local_num_edges_checked = 0;
+    #pragma omp parallel private(local_num_frontier_edges, local_num_edges_checked)
+    {
+        vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
+        init_vertex_set(local_frontier, g->n);
+        #pragma omp for schedule(static)
+        for (int i = 0; i < frontier->num_vertices; ++i) {
+            int vid = frontier->vertices[i];
+            for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid+1]; ++eid) {
+                int nid = g->out_edge_list[eid];
+                if (S.count(nid) && __sync_bool_compare_and_swap(&distances[nid], UNVISITED, distances[vid] + 1)) {
+                    local_frontier->vertices[local_frontier->num_vertices++] = nid;
+                    local_num_frontier_edges += g->out_offsets[nid + 1] - g->out_offsets[nid];
+                }
+                local_num_edges_checked++;
+            }
+        }
+        // Copy local next frontier to real next frontier
+        #pragma omp critical
+        {
+            std::memcpy(next_frontier->vertices+next_frontier->num_vertices, local_frontier->vertices, local_frontier->num_vertices*sizeof(int));
+            next_frontier->num_vertices += local_frontier->num_vertices;
+            num_frontier_edges += local_num_frontier_edges;
+            num_edges_checked += local_num_edges_checked;
+        }
+        free_vertex_set(local_frontier);
+    }
+}
+
+void inline bfs_bottom_up_step(Graph &g, std::unordered_set<int> &S, int &frontier_size, int iter, std::vector<int> &distances) {
+    int shared_frontier_size = 0;
+    #pragma omp parallel
+    {
+        // Iterate over vertices
+        #pragma omp for reduction(+:shared_frontier_size) schedule(static)
+        for (int vid = 0; vid < g->n; ++vid) {
+            if (S.count(vid) && distances[vid] == UNVISITED) {
+                for (int eid = g->in_offsets[vid]; eid < g->in_offsets[vid + 1]; ++eid) {
+                    int nid = g->in_edge_list[eid];
+                    if (distances[nid] == iter - 1) {
+                        distances[vid] = iter;
+                        shared_frontier_size += 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    frontier_size = shared_frontier_size;
+}
+
+std::unordered_set<int> bfs_hybrid(Graph g, std::unordered_set<int> &S, int source) {
+    double alpha = 10.0;
+    double beta  = 10.0;
+
+    std::vector<int> distances(g->n, UNVISITED);
+
+    vertex_set *frontier = (vertex_set *) malloc(sizeof(vertex_set));
+    vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
+    init_vertex_set(frontier, g->n);
+    init_vertex_set(next_frontier, g->n);
+
+    int frontier_size = 0;
+    int iter          = 1;
+
+    int num_frontier_edges  = 0;
+    int num_unvisited_edges = 2 * g->m;
+    unsigned char last_step = TOP_DOWN;
+
+    frontier->vertices[frontier->num_vertices++] = source;
+    frontier_size++;
+    distances[source] = 0;
+    num_frontier_edges += g->out_edge_list[source + 1] - g->out_edge_list[source];
+
+    while (frontier_size > 0) {
+        if (last_step == TOP_DOWN) {
+            bool should_switch = ((double) num_frontier_edges) > (((double) num_unvisited_edges) / alpha);
+            if (should_switch) {
+                last_step = BOTTOM_UP;
+                bfs_bottom_up_step(g, S, frontier_size, iter, distances);
+            } else {
+                reset_frontier(next_frontier);
+                int num_edges_checked = 0;
+                bfs_top_down_step(g, S, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
+                num_unvisited_edges -= num_edges_checked;
+                advance_frontier(frontier, next_frontier);
+            }
+        } else {
+            bool should_switch = ((double) frontier_size) < (((double) g->n) / beta);
+            if (should_switch) {
+                last_step = TOP_DOWN;
+                reset_frontier(frontier);
+                num_unvisited_edges = 0;
+                for (int vid = 0; vid < g->n; ++vid) {
+                    if (distances[vid] == iter - 1) {
+                        frontier->vertices[frontier->num_vertices++] = vid;
+                    } else if (distances[vid] == UNVISITED) {
+                        num_unvisited_edges += g->out_offsets[vid + 1] - g->out_offsets[vid];
+                    }
+                }
+                reset_frontier(next_frontier);
+                int num_edges_checked = 0;
+                bfs_top_down_step(g, S, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
+                num_unvisited_edges -= num_edges_checked;
+                advance_frontier(frontier, next_frontier);
+            } else {
+                bfs_bottom_up_step(g, S, frontier_size, iter, distances);
+            }
+        }
+        iter++;
+    }
+    std::unordered_set<int> reach;
+    for (int vid = 0; vid < g->n; ++vid) {
+        if (distances[vid] != UNVISITED) {
+            reach.insert(vid);
+        }
+    }
+
+    free_vertex_set(frontier);
+    free_vertex_set(next_frontier);
+    return reach;
+}

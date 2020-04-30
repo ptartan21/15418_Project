@@ -28,7 +28,7 @@ std::unordered_set<int> backward_reachability_par(Graph &g, std::unordered_set<i
     return bw_vertices;
 }
 
-/***** SEQUENTIAL *****/
+/***** PARALLEL *****/
 // stores all strongly connected components into all_scc
 void compute_scc_par(std::vector<std::unordered_set<int>> &all_scc, Graph &g, int method) {
     auto start_time = std::chrono::steady_clock::now();
@@ -59,6 +59,6 @@ void compute_scc_par(std::vector<std::unordered_set<int>> &all_scc, Graph &g, in
         }
     }
     auto end_time = std::chrono::steady_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << "Number of Strongly Connected Components: " << all_scc.size() << std::endl;
 }
