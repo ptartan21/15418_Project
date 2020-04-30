@@ -260,16 +260,46 @@ void inline le_lists_seq_wrapper(Graph g) {
 
     
 
-    for (int vid = 0; vid < g->n; ++vid) {
-        std::cout << "LE-List for vertex " << vid << std::endl;
-        std::vector<int> L_vid_v = L_v[vid];
-        std::vector<int> L_vid_d = L_d[vid];
-        for (int j = 0; j < L_vid_v.size(); ++j) {
-            int nid = L_vid_v[j];
-            std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
-        }
-        std::cout << "\n";
+    // for (int vid = 0; vid < g->n; ++vid) {
+    //     std::cout << "LE-List for vertex " << vid << std::endl;
+    //     std::vector<int> L_vid_v = L_v[vid];
+    //     std::vector<int> L_vid_d = L_d[vid];
+    //     for (int j = 0; j < L_vid_v.size(); ++j) {
+    //         int nid = L_vid_v[j];
+    //         std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+    //     }
+    //     std::cout << "\n";
+    // }
+
+    std::cout << std::to_string(runtime) << std::endl;
+
+}
+
+void inline le_lists_par_wrapper(Graph g) {
+    std::cout << "LE-Lists (Par)" << std::endl;
+    std::vector<std::vector<int>> L_v;
+    std::vector<std::vector<int>> L_d;
+    std::unordered_map<std::string, double> metrics;
+    double runtime = std::numeric_limits<double>::max();
+    for (int i = 0; i < 3; ++i) {
+        le_lists_par(g, L_v, L_d, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
     }
+
+    
+
+    // for (int vid = 0; vid < g->n; ++vid) {
+    //     std::cout << "LE-List for vertex " << vid << std::endl;
+    //     std::vector<int> L_vid_v = L_v[vid];
+    //     std::vector<int> L_vid_d = L_d[vid];
+    //     for (int j = 0; j < L_vid_v.size(); ++j) {
+    //         int nid = L_vid_v[j];
+    //         std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+    //     }
+    //     std::cout << "\n";
+    // }
 
     std::cout << std::to_string(runtime) << std::endl;
 
@@ -285,14 +315,9 @@ int main(int argc, char **argv) {
     // std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    // bfs_top_down_seq_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
+    ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
 
     // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
     //     std::string num_threads_str = std::to_string(num_threads);
@@ -313,7 +338,8 @@ int main(int argc, char **argv) {
 
     // bfs_correctness_wrapper(g);
 
-    le_lists_seq_wrapper(g);
+    // le_lists_seq_wrapper(g);
+    // le_lists_par_wrapper(g);
 
     free(g);
 

@@ -47,8 +47,8 @@ double get_frac_intercluster_edges(Graph &g, int *ball_ids) {
             ball_owners.insert(ball_ids[vid]);
         }
     }
-    int num_balls = ball_owners.size();
-    std::cout << "Num Balls: " << num_balls << std::endl;
+    // int num_balls = ball_owners.size();
+    // std::cout << "Num Balls: " << num_balls << std::endl;
     int total_intercluster_edges = 0;
     // Iterate over ball owners; find isoperimetric number of each ball
     for (auto &owner : ball_owners) {

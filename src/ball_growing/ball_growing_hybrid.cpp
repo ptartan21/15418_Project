@@ -121,13 +121,6 @@ void inline bg_bottom_up_step(Graph &g, int *distances, double *deltas,
                                 min_delta_frac = delta_frac;
                                 oid = nid;
                             }
-                            // oid = nid;
-                            // ball_ids[vid] = ball_ids[oid];
-                            // deltas[vid] = deltas[oid];
-                            // distances[vid] = iter;
-                            // shared_frontier_size++;
-                            // owner[vid] = oid;
-                            // break;
                         }
                     }
                     if (visited) {
@@ -187,7 +180,6 @@ void ball_decomp_hybrid(Graph g, double beta,
     while (num_unvisited > 0) {
         if (last_step == TOP_DOWN) {
             bool should_switch = ((double) num_frontier_edges) > (((double) num_unvisited_edges) / alpha);
-            // bool should_switch = false;
             if (should_switch) {
                 last_step = BOTTOM_UP;
                 bg_bottom_up_step(g, distances, deltas, ball_ids, frontier_size, owner, num_unvisited, iter);
@@ -224,10 +216,10 @@ void ball_decomp_hybrid(Graph g, double beta,
     }
 
     auto end_time = std::chrono::steady_clock::now();
-    std::cout << "Iterations: " << iter << std::endl;
+    // std::cout << "Iterations: " << iter << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
-    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
+    // std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
 
     double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
     metrics.insert(std::make_pair("runtime", runtime));

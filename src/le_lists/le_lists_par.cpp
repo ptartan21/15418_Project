@@ -7,11 +7,10 @@
 
 void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set *next_frontier, 
     int *distances, int &num_frontier_edges, int &num_edges_checked, int *deltas, vertex_set *S, unsigned char *in_S, int iter) {
-            
-    int local_num_frontier_edges = 0;
-    int local_num_edges_checked = 0;
-    #pragma omp parallel private(local_num_frontier_edges, local_num_edges_checked)
+    #pragma omp parallel 
     {
+        int local_num_frontier_edges = 0;
+        int local_num_edges_checked = 0;
         vertex_set *local_frontier = (vertex_set *) malloc(sizeof(vertex_set));
         init_vertex_set(local_frontier, g->n);
         vertex_set *local_S = (vertex_set *) malloc(sizeof(vertex_set));
@@ -28,7 +27,6 @@ void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set
                         local_frontier->vertices[local_frontier->num_vertices++] = nid;
                         local_num_frontier_edges += g->out_offsets[nid+1] - g->out_offsets[nid];
                         local_S->vertices[local_S->num_vertices++] = nid;
-                        // in_S[nid] = 1;
                     }
 
                 }
@@ -82,7 +80,7 @@ void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, i
 }
 
 void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S, int *distances, unsigned char *in_S) {
-    double alpha = 10.0;
+    double alpha = 2.0;
     double gamma = 10.0;
     
     S->num_vertices = 0;
@@ -171,19 +169,14 @@ void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
     int *distances = (int *) malloc(g->n*sizeof(int));
     unsigned char *in_S = (unsigned char *) calloc(g->n, sizeof(unsigned char));
 
+    #pragma omp parallel
+    {
     for (int vid = 0; vid < g->n; ++vid) {
+        #pragma omp single
         le_lists_bfs_hybrid(g, vid, deltas, S, distances, in_S);
-        #pragma omp parallel
+        // #pragma omp parallel
         {
-            #pragma omp for schedule(static)
-            for (int i = 0; i < S->num_vertices; ++i) {            
-                int u = S->vertices[i];
-                deltas[u] = distances[u];
-                L_v[u].push_back(vid);
-                L_d[u].push_back(distances[u]);
-            }
-            
-            // #pragma omp for schedule(static)
+            // #pragma omp for schedule(static) nowait
             // for (int u = 0; u < g->n; ++u) {
             //     if (in_S[u]) {
             //         deltas[u] = distances[u];
@@ -191,9 +184,15 @@ void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
             //         L_d[u].push_back(distances[u]);
             //     }
             // }
+            #pragma omp for schedule(static)
+            for (int i = 0; i < S->num_vertices; ++i) {            
+                int u = S->vertices[i];
+                deltas[u] = distances[u];
+                L_v[u].push_back(vid);
+                L_d[u].push_back(distances[u]);
+            }
         }
-        
-
+    }
     }
     auto end_time = std::chrono::steady_clock::now();
     double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();

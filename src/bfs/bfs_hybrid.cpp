@@ -63,7 +63,7 @@ void inline bfs_bottom_up_step(Graph g, int &frontier_size, int iter, int *dista
 void bfs_hybrid(Graph g, int source, int *distances,
     std::unordered_map<std::string, double> &metrics) {
     double alpha = 10.0;
-    double beta = 10.0;
+    double gamma = 10.0;
     auto start_time = std::chrono::steady_clock::now();
 
     // Reset distances
@@ -102,9 +102,10 @@ void bfs_hybrid(Graph g, int source, int *distances,
                 bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
                 num_unvisited_edges -= num_edges_checked;
                 advance_frontier(frontier, next_frontier);
+                frontier_size = frontier->num_vertices;
             }
         } else {
-            bool should_switch = ((double) frontier_size) < (((double) g->n) / beta);
+            bool should_switch = ((double) frontier_size) < (((double) g->n) / gamma);
             if (should_switch) {
                 last_step = TOP_DOWN;
                 // Reconstruct the current frontier
@@ -122,17 +123,11 @@ void bfs_hybrid(Graph g, int source, int *distances,
                 bfs_top_down_step(g, frontier, next_frontier, distances, num_frontier_edges, num_edges_checked);
                 num_unvisited_edges -= num_edges_checked;
                 advance_frontier(frontier, next_frontier);
+                frontier_size = frontier->num_vertices;
             } else {
                 bfs_bottom_up_step(g, frontier_size, iter, distances);
             }
         }
-        std::string step;
-        if (last_step == TOP_DOWN) {
-            step = "top down";
-        } else {
-            step = "bottom up";
-        }
-        std::cout << "Iteration " << iter << ": " << step << std::endl;
         iter++;
     }
     auto end_time = std::chrono::steady_clock::now();
