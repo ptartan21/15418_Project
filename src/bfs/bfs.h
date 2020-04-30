@@ -16,5 +16,6 @@
 
 #include "bfs_util.cpp"
 #include "../ball_growing/ball_growing_util.cpp"
+#include "../scc/scc_util.cpp"
 
 #endif
