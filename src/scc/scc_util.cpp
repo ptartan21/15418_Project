@@ -1,7 +1,7 @@
 #include <cstdlib>
-#include <vector>
 #include <iostream>
 #include <algorithm>
+#include <vector>
 #include <unordered_set>
 #include <omp.h>
 
@@ -13,6 +13,39 @@ void deep_copy(int *src, int *dest, int n) {
     for (int i = 0; i < n; ++i) {
         dest[i] = src[i];
     }
+}
+
+// computes the set union of S1 and S2
+std::unordered_set<int> set_u(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
+    std::unordered_set<int> res;
+    for (auto &v : S1) { res.insert(v); }
+    for (auto &v : S2) { res.insert(v); }
+    return res;
+}
+
+// computes the set intersection of S1 and S2
+std::unordered_set<int> set_i(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
+    if (S1.size() > S2.size()) {
+        return set_i(S2, S1);
+    }
+    std::unordered_set<int> intersect;
+    for (auto &v : S1) {
+        if (S2.count(v)) {
+            intersect.insert(v);
+        }
+    }
+    return intersect;
+}
+
+// computes the set difference S1 - S2
+std::unordered_set<int> set_d(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
+    std::unordered_set<int> diff;
+    for (auto &v : S1) {
+        if (!S2.count(v)) {
+            diff.insert(v);
+        }
+    }
+    return diff;
 }
 
 // Constructing the reverse graph (flipping the direction of each edge) of g
