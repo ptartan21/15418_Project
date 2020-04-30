@@ -16,6 +16,7 @@
 #include "ball_growing/ball_growing_par.cpp"
 #include "ball_growing/ball_growing_hybrid.cpp"
 #include "scc/scc_seq.cpp"
+#include "scc/scc_par.cpp"
 
 /*
  * Populate g from the given input file.
@@ -245,7 +246,7 @@ void inline bfs_correctness_wrapper(Graph &g) {
 }
 
 // 0 == bottom up seq, 1 == top down seq
-void inline scc_wrapper(Graph &g, int method) {
+void inline scc_seq_wrapper(Graph &g, int method) {
     std::vector<std::unordered_set<int>> all_scc;
     if (method == 0) {
         std::cout << "SCC Bottom Up BFS (Sequential)" << std::endl;
@@ -253,6 +254,18 @@ void inline scc_wrapper(Graph &g, int method) {
     } else if (method == 1) {
         std::cout << "SCC Top Down BFS (Sequential)" << std::endl;
         compute_scc_seq(all_scc, g, 1);
+    }
+}
+
+// 0 == bottom up seq, 1 == top down seq
+void inline scc_par_wrapper(Graph &g, int method) {
+    std::vector<std::unordered_set<int>> all_scc;
+    if (method == 0) {
+        std::cout << "SCC Bottom Up BFS (Parallel)" << std::endl;
+        compute_scc_par(all_scc, g, 0);
+    } else if (method == 1) {
+        std::cout << "SCC Top Down BFS (Parallel)" << std::endl;
+        compute_scc_par(all_scc, g, 1);
     }
 }
 
@@ -294,8 +307,10 @@ int main(int argc, char **argv) {
 
     // bfs_correctness_wrapper(g);
 
-    scc_wrapper(g, 0);
-    scc_wrapper(g, 1);
+    scc_seq_wrapper(g, 0);
+    scc_seq_wrapper(g, 1);
+    scc_par_wrapper(g, 0);
+    scc_par_wrapper(g, 1);
     free(g);
 
     return 0;
