@@ -255,10 +255,9 @@ void inline scc_seq_wrapper(Graph &g, int method) {
     }
 }
 
-/*
 // 0 == bottom up seq, 1 == top down seq
 void inline scc_par_wrapper(Graph &g, int method) {
-    std::vector<std::unordered_set<int>> all_scc;
+    std::vector<unsigned char*> all_scc;
     if (method == 0) {
         std::cout << "SCC Bottom Up BFS (Parallel)" << std::endl;
         compute_scc_par(all_scc, g, 0);
@@ -269,11 +268,10 @@ void inline scc_par_wrapper(Graph &g, int method) {
 }
 
 void inline scc_hybrid_wrapper(Graph &g) {
-    std::vector<std::unordered_set<int>> all_scc;
+    std::vector<unsigned char*> all_scc;
     std::cout << "SCC Hybrid BFS" << std::endl;
     compute_scc_hybrid(all_scc, g);
 }
-*/
 
 void inline le_lists_seq_wrapper(Graph g) {
     std::cout << "LE-Lists (Seq)" << std::endl;
@@ -366,8 +364,11 @@ int main(int argc, char **argv) {
     }
     */
 
-    scc_seq_wrapper(g, 0);
-    scc_seq_wrapper(g, 1);
+    // scc_seq_wrapper(g, 0);
+    // scc_seq_wrapper(g, 1);
+    scc_par_wrapper(g, 0);
+    scc_par_wrapper(g, 1);
+    scc_hybrid_wrapper(g);
 
     // bfs_correctness_wrapper(g);
     // le_lists_seq_wrapper(g);
