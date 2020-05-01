@@ -4,22 +4,16 @@ import sys
 import random
 
 def export_graph(G, filename):
-    # adj_list = G.adjacency()
-    adj_list = nx.generate_adjlist(G)
+    adj_list = G.adjacency()
     n = G.number_of_nodes()
     m = G.number_of_edges()
     with open(filename, "w+") as f:
         f.write("%d %d" % (n, m))
         f.write("\n")
-        '''
         for row in adj_list:
             out = [row[0]] + list(row[1].keys())
             out = map(lambda x: str(x), out)
             f.write(" ".join(out))
-            f.write("\n")
-        '''
-        for row in adj_list:
-            f.write(row)
             f.write("\n")
     print("Exported to %s" % filename)
 
@@ -128,6 +122,18 @@ def export_barabasi_albert_graph(n, m, prefix):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_scale_free_graph(n, prefix):
+    G = nx.scale_free_graph(n)
+    gname = prefix + "scale_free_%d" % (n)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
+def export_random_k_out_graph(n, k, alpha, prefix):
+    G = nx.random_k_out_graph(n, k, alpha)
+    gname = prefix + "random_k_out_%d_%d_%s" % (n, k, str(alpha))
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -155,5 +161,7 @@ if __name__ == "__main__":
         # export_erdos_renyi_graph(20000, 0.25)
         # export_random_graph(20000, 40000)
         # export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
-        export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
-        export_barabasi_albert_graph(20000, 20, "../graphs/barabasi_albert/20000/")
+        # export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
+        # export_barabasi_albert_graph(20000, 20, "../graphs/barabasi_albert/20000/")
+        export_scale_free_graph(2000, "../graphs/scale_free/")
+        export_random_k_out_graph(2000, 20, 0.1, "../graphs/random_k_out/")
