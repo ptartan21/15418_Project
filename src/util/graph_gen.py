@@ -7,7 +7,7 @@ def export_graph(G, filename):
     adj_list = G.adjacency()
     n = G.number_of_nodes()
     m = G.number_of_edges()
-    with open(filename, "w") as f:
+    with open(filename, "w+") as f:
         f.write("%d %d" % (n, m))
         f.write("\n")
         for row in adj_list:
@@ -65,10 +65,7 @@ def export_complete_graph(n):
     gname = "complete_%d_%s" % (n, m)
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
-
-def mapping(x):
-    return x
-
+    
 def export_random_clustered_graph(joint_deg_seq):
     G = nx.random_clustered_graph(joint_deg_seq)
     G = nx.Graph(G) # remove parallel edges
@@ -113,6 +110,12 @@ def export_powerlaw_cluster_graph_batch(n, m, p, batch_size, prefix):
         gname = prefix + "random_powerlaw_cluster_%d_%d_%s_%d" % (n, m, str(p), i)
         export_graph(G, gname + ".txt")
 
+def export_watts_strogatz_graph(n, k, p, prefix):
+    G = nx.watts_strogatz_graph(n, k, p)
+    gname = prefix + "watts_strogatz_%d_%d_%s" % (n, k, str(p))
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -139,4 +142,5 @@ if __name__ == "__main__":
         # export_powerlaw_cluster_graph(20000, 5, 0.25)
         # export_erdos_renyi_graph(20000, 0.25)
         # export_random_graph(20000, 40000)
-        export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
+        # export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
+        export_watts_strogatz_graph(20000, 20, 0.25, "../graphs/watts_strogatz/20000/")
