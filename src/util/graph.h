@@ -12,13 +12,26 @@ typedef struct {
 
     int *in_offsets;
     int *in_edge_list;
-    
+
 } graph_t, *Graph;
 
 struct vertex_set {
     int num_vertices;
     int *vertices;
 };
+
+/*
+ * Allocates a graph data structure
+ */
+Graph alloc_graph(int n, int m) {
+    Graph g = (graph_t *) malloc(sizeof(graph_t));
+    g->n = n; g->m = m;
+    g->out_offsets   = (int *) calloc(n + 1, sizeof(int));
+    g->out_edge_list = (int *) calloc(2 * m, sizeof(int));
+    g->in_offsets    = (int *) calloc(n + 1, sizeof(int));
+    g->in_edge_list  = (int *) calloc(2 * m, sizeof(int));
+    return g;
+}
 
 /*
  * Initializes the vertex set.
