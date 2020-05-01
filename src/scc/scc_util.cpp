@@ -50,13 +50,7 @@ std::unordered_set<int> set_d(std::unordered_set<int> &S1, std::unordered_set<in
 
 // Constructing the reverse graph (flipping the direction of each edge) of g
 Graph reverse_graph(Graph g) {
-    Graph rev_g = (graph_t *) malloc(sizeof(graph_t));
-    rev_g->out_offsets   = (int *) calloc(g->n + 1, sizeof(int));
-    rev_g->out_edge_list = (int *) calloc(2 * g->m, sizeof(int));
-    rev_g->in_offsets    = (int *) calloc(g->n + 1, sizeof(int));
-    rev_g->in_edge_list  = (int *) calloc(2 * g->m, sizeof(int));
-    rev_g->n = g->n;
-    rev_g->m = g->m;
+    Graph rev_g = alloc_graph(g->n, g->m);
     deep_copy(g->out_offsets, rev_g->in_offsets, g->n + 1);
     deep_copy(g->in_offsets, rev_g->out_offsets, g->n + 1);
     deep_copy(g->out_edge_list, rev_g->in_edge_list, 2 * g->m);
@@ -394,11 +388,15 @@ std::unordered_set<int> bfs_hybrid(Graph g, std::unordered_set<int> &S, int sour
                 last_step = TOP_DOWN;
                 reset_frontier(frontier);
                 num_unvisited_edges = 0;
-                for (int vid = 0; vid < g->n; ++vid) {
-                    if (distances[vid] == iter - 1) {
-                        frontier->vertices[frontier->num_vertices++] = vid;
-                    } else if (distances[vid] == UNVISITED) {
-                        num_unvisited_edges += g->out_offsets[vid + 1] - g->out_offsets[vid];
+                #pragma omp parallel
+                {
+                    #pragma omp for schedule(static)
+                    for (int vid = 0; vid < g->n; ++vid) {
+                        if (distances[vid] == iter - 1) {
+                            frontier->vertices[frontier->num_vertices++] = vid;
+                        } else if (distances[vid] == UNVISITED) {
+                            num_unvisited_edges += g->out_offsets[vid + 1] - g->out_offsets[vid];
+                        }
                     }
                 }
                 reset_frontier(next_frontier);

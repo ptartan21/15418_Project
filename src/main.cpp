@@ -337,9 +337,9 @@ int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = load_graph(graph_in);
 
-    // int num_threads = 8;
-    // omp_set_num_threads(num_threads);
-    // std::cout << "Number of Threads: " << num_threads << std::endl;
+    int num_threads = 8;
+    omp_set_num_threads(num_threads);
+    std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
     // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
@@ -370,6 +370,7 @@ int main(int argc, char **argv) {
     scc_par_wrapper(g, 0);
     scc_par_wrapper(g, 1);
     scc_hybrid_wrapper(g);
+
     // le_lists_seq_wrapper(g);
     // le_lists_par_wrapper(g);
 
