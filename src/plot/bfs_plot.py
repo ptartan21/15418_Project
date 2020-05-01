@@ -91,7 +91,7 @@ def plot_runtimes_powerlaw(prefix):
     plt.xlabel("Number of Threads")
     plt.ylabel("Time (ns)")
     plt.legend(["Top Down (Seq)", "Top Down (Par)", "Bottom Up (Seq)", "Bottom Up (Par)", "Hybrid (Par)"])
-    plt.title("BFS Runtimes on Random Powerlaw Graphs ($|V| = 20000$, $m = 5$, $p = 0.25$)", fontsize=12)
+    plt.title("BFS Runtimes on Random Powerlaw Graphs ($|V| = 20000$, deg$(v) = 5$, $p = 0.25$)", fontsize=12)
     plt.savefig("bfs_plots/bfs_powerlaw_runtimes.png", dpi=500)
     plt.show()
 
@@ -117,7 +117,7 @@ def plot_runtimes_powerlaw2(prefix):
     plt.xlabel("Number of Threads")
     plt.ylabel("Time (ns)")
     plt.legend(["Top Down (Seq)", "Top Down (Par)", "Bottom Up (Seq)", "Bottom Up (Par)", "Hybrid (Par)"])
-    plt.title("BFS Runtimes on Random Powerlaw Graphs ($|V| = 20000$, $m = 10$, $p = 0.25$)", fontsize=12)
+    plt.title("BFS Runtimes on Random Powerlaw Graphs ($|V| = 20000$, deg$(v) = 10$, $p = 0.25$)", fontsize=12)
     plt.savefig("bfs_plots/bfs_powerlaw2_runtimes.png", dpi=500)
     plt.show()
 
@@ -144,7 +144,7 @@ def plot_speedup_powerlaw(prefix):
     plt.plot(ts, [1 for _ in range(8)], alpha=0.5)
     plt.xlabel("Number of Threads")
     plt.ylabel("Speedup")
-    plt.title("BFS Speedup on Random Powerlaw Graphs ($|V| = 20000$, $m = 5$, $p = 0.25$)", fontsize=12)
+    plt.title("BFS Speedup on Random Powerlaw Graphs ($|V| = 20000$, deg$(v) = 5$, $p = 0.25$)", fontsize=12)
     plt.legend(["Top Down", "Bottom Up", "Direction Optimizing", "Baseline"])
     plt.savefig("bfs_plots/bfs_powerlaw_speedup.png", dpi=500)
     plt.show()
@@ -206,9 +206,9 @@ def plot_speedup_random(prefix):
 
 prefix = "../results/bfs/"
 # plot_runtimes_internet(prefix)
-# plot_runtimes_powerlaw(prefix)
-# plot_runtimes_powerlaw2(prefix)
-plot_runtimes_random(prefix)
+plot_runtimes_powerlaw(prefix)
+plot_runtimes_powerlaw2(prefix)
+# plot_runtimes_random(prefix)
 
 # plot_speedup_powerlaw(prefix)
-plot_speedup_random(prefix)
+# plot_speedup_random(prefix)
