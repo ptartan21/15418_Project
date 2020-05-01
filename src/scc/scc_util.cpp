@@ -194,7 +194,7 @@ void construct_frontier_top_down_par(Graph &g, std::unordered_set<int> &S, verte
         }
         #pragma omp critical
         {
-            std:memcpy(next_frontier->vertices + next_frontier->num_vertices, local_frontier->vertices, local_frontier->num_vertices * sizeof(int));
+            std::memcpy(next_frontier->vertices + next_frontier->num_vertices, local_frontier->vertices, local_frontier->num_vertices * sizeof(int));
             next_frontier->num_vertices += local_frontier->num_vertices;
         }
         free_vertex_set(local_frontier);
@@ -388,15 +388,11 @@ std::unordered_set<int> bfs_hybrid(Graph g, std::unordered_set<int> &S, int sour
                 last_step = TOP_DOWN;
                 reset_frontier(frontier);
                 num_unvisited_edges = 0;
-                #pragma omp parallel
-                {
-                    #pragma omp for schedule(static)
-                    for (int vid = 0; vid < g->n; ++vid) {
-                        if (distances[vid] == iter - 1) {
-                            frontier->vertices[frontier->num_vertices++] = vid;
-                        } else if (distances[vid] == UNVISITED) {
-                            num_unvisited_edges += g->out_offsets[vid + 1] - g->out_offsets[vid];
-                        }
+                for (int vid = 0; vid < g->n; ++vid) {
+                    if (distances[vid] == iter - 1) {
+                        frontier->vertices[frontier->num_vertices++] = vid;
+                    } else if (distances[vid] == UNVISITED) {
+                        num_unvisited_edges += g->out_offsets[vid + 1] - g->out_offsets[vid];
                     }
                 }
                 reset_frontier(next_frontier);
@@ -408,6 +404,14 @@ std::unordered_set<int> bfs_hybrid(Graph g, std::unordered_set<int> &S, int sour
                 bfs_bottom_up_step(g, S, frontier_size, iter, distances);
             }
         }
+        /*
+        std::cout << "Iteration: " << iter << std::endl;
+        if (last_step == TOP_DOWN) {
+            std::cout << "Top Down" << std::endl;
+        } else {
+            std::cout << "Bottom Up" << std::endl;
+        }
+        */
         iter++;
     }
     std::unordered_set<int> reach;

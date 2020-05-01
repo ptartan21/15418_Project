@@ -59,7 +59,7 @@ Graph load_graph(std::string graph_in) {
     off = 0;
     pos = 0;
     // for each vertex->in_neighbor pair
-    for (int vtx = 0; vtx < in_mapper.size(); ++vtx) {
+    for (size_t vtx = 0; vtx < in_mapper.size(); ++vtx) {
         g->in_offsets[off++] = pos;
         // for each in-neighbor of the current vertex
         for (auto &in_nbor : in_mapper[vtx]) {
