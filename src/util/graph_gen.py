@@ -4,16 +4,22 @@ import sys
 import random
 
 def export_graph(G, filename):
-    adj_list = G.adjacency()
+    # adj_list = G.adjacency()
+    adj_list = nx.generate_adjlist(G)
     n = G.number_of_nodes()
     m = G.number_of_edges()
     with open(filename, "w+") as f:
         f.write("%d %d" % (n, m))
         f.write("\n")
+        '''
         for row in adj_list:
             out = [row[0]] + list(row[1].keys())
             out = map(lambda x: str(x), out)
             f.write(" ".join(out))
+            f.write("\n")
+        '''
+        for row in adj_list:
+            f.write(row)
             f.write("\n")
     print("Exported to %s" % filename)
 
@@ -149,5 +155,5 @@ if __name__ == "__main__":
         # export_erdos_renyi_graph(20000, 0.25)
         # export_random_graph(20000, 40000)
         # export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
-        # export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
+        export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
         export_barabasi_albert_graph(20000, 20, "../graphs/barabasi_albert/20000/")
