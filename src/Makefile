@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++0x -Wall -fopenmp -Wno-maybe-uninitialized
-CXXFILES = main.cpp
+CXXFILES = main_scc.cpp
 
 all: a.out
 
