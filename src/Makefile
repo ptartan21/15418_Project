@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++0x -O3 -Wall -fopenmp -Wno-maybe-uninitialized
+CXXFLAGS = -std=c++0x -Wall -fopenmp -Wno-maybe-uninitialized
 CXXFILES = main.cpp
 
 all: a.out
