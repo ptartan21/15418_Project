@@ -26,7 +26,7 @@
  *     graph_in - input filename
  *     g - graph
  */
-void inline load_graph(std::string graph_in, Graph &g) {
+Graph load_graph(std::string graph_in) {
     int n, m;
     std::ifstream source;
     source.open(graph_in);
@@ -37,10 +37,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
     iss >> n >> m;
     std::vector<std::vector<int>> in_mapper(n + 1, std::vector<int>{});
     // populating the out-neighbor portion of the graph
-    g->out_offsets   = (int *) calloc(n + 1, sizeof(int));
-    g->out_edge_list = (int *) calloc(2*m,   sizeof(int));
-    g->n = n;
-    g->m = m;
+    Graph g = alloc_graph(n, m);
     int v   = -1;
     int off = 0;
     int pos = 0;
@@ -59,8 +56,6 @@ void inline load_graph(std::string graph_in, Graph &g) {
     g->out_offsets[n] = num_edges_stored;
 
     // populating the in-neighbor portion of the graph
-    g->in_offsets   = (int *) calloc(n + 1, sizeof(int));
-    g->in_edge_list = (int *) calloc(2*m,   sizeof(int));
     off = 0;
     pos = 0;
     // for each vertex->in_neighbor pair
@@ -74,7 +69,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
     g->in_offsets[n] = num_edges_stored;
     source.close();
     std::cout << "Succesfully Loaded Graph" << std::endl;
-
+    return g;
 }
 
 void inline bfs_top_down_seq_wrapper(Graph g, std::string out_filename) {
@@ -340,17 +335,16 @@ void inline le_lists_par_wrapper(Graph g) {
 
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
-    Graph g = (graph_t *) malloc(sizeof(graph_t));
-    load_graph(graph_in, g);
+    Graph g = load_graph(graph_in);
 
     // int num_threads = 8;
     // omp_set_num_threads(num_threads);
     // std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
-    ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
+    // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
 
     // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
     //     std::string num_threads_str = std::to_string(num_threads);
@@ -371,11 +365,11 @@ int main(int argc, char **argv) {
 
     // bfs_correctness_wrapper(g);
 
-    // scc_seq_wrapper(g, 0);
-    // scc_seq_wrapper(g, 1);
-    // scc_par_wrapper(g, 0);
-    // scc_par_wrapper(g, 1);
-    // scc_hybrid_wrapper(g);
+    scc_seq_wrapper(g, 0);
+    scc_seq_wrapper(g, 1);
+    scc_par_wrapper(g, 0);
+    scc_par_wrapper(g, 1);
+    scc_hybrid_wrapper(g);
     // le_lists_seq_wrapper(g);
     // le_lists_par_wrapper(g);
 
