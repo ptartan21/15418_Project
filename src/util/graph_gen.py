@@ -15,7 +15,6 @@ def export_graph(G, filename):
             out = map(lambda x: str(x), out)
             f.write(" ".join(out))
             f.write("\n")
-        
     print("Exported to %s" % filename)
 
 # Generates G_{n,p} (Erdos-Renyi graph/binomial graph).
@@ -131,6 +130,12 @@ def export_scale_free_graph(n, prefix):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_random_k_out_graph(n, k, alpha, prefix):
+    G = nx.random_k_out_graph(n, k, alpha)
+    gname = prefix + "random_k_out_%d_%d_%s" % (n, k, str(alpha))
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -160,4 +165,6 @@ if __name__ == "__main__":
         # export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
         # export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
         # export_barabasi_albert_graph(20000, 20, "../graphs/barabasi_albert/20000/")
-        export_scale_free_graph(10000, "../graphs/scale_free/")
+        # export_scale_free_graph(10000, "../graphs/scale_free/")
+        # export_scale_free_graph(2000, "../graphs/scale_free/")
+        # export_random_k_out_graph(2000, 20, 0.1, "../graphs/random_k_out/")
