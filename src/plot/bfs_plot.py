@@ -144,14 +144,71 @@ def plot_speedup_powerlaw(prefix):
     plt.plot(ts, [1 for _ in range(8)], alpha=0.5)
     plt.xlabel("Number of Threads")
     plt.ylabel("Speedup")
-    plt.title("BFS SPeedup on Random Powerlaw Graphs ($|V| = 20000$, $m = 5$, $p = 0.25$)", fontsize=12)
+    plt.title("BFS Speedup on Random Powerlaw Graphs ($|V| = 20000$, $m = 5$, $p = 0.25$)", fontsize=12)
     plt.legend(["Top Down", "Bottom Up", "Direction Optimizing", "Baseline"])
     plt.savefig("bfs_plots/bfs_powerlaw_speedup.png", dpi=500)
     plt.show()
+
+def plot_runtimes_random(prefix):
+    ts = np.arange(1,9)
+    avg_top_down_seq_runtimes = list()
+    avg_top_down_par_runtimes = list()
+    avg_bottom_up_seq_runtimes = list()
+    avg_bottom_up_par_runtimes = list()
+    avg_hybrid_par_runtimes = list()
+    for t in ts:
+        avg_top_down_seq_runtime, avg_top_down_par_runtime, avg_bottom_up_seq_runtime, avg_bottom_up_par_runtime, avg_hybrid_par_runtime = read_out(os.path.join(prefix, "bfs_random_graph_" + str(t) + ".txt"))
+        avg_top_down_seq_runtimes.append(avg_top_down_seq_runtime)
+        avg_top_down_par_runtimes.append(avg_top_down_par_runtime)
+        avg_bottom_up_seq_runtimes.append(avg_bottom_up_seq_runtime)
+        avg_bottom_up_par_runtimes.append(avg_bottom_up_par_runtime)
+        avg_hybrid_par_runtimes.append(avg_hybrid_par_runtime)
+    plt.plot(ts, avg_top_down_seq_runtimes)
+    plt.plot(ts, avg_top_down_par_runtimes)
+    plt.plot(ts, avg_bottom_up_seq_runtimes)
+    plt.plot(ts, avg_bottom_up_par_runtimes)
+    plt.plot(ts, avg_hybrid_par_runtimes)
+    plt.xlabel("Number of Threads")
+    plt.ylabel("Time (ns)")
+    plt.legend(["Top Down (Seq)", "Top Down (Par)", "Bottom Up (Seq)", "Bottom Up (Par)", "Hybrid (Par)"])
+    plt.title("BFS Runtimes on Random Graphs ($|V| = 20000$, $|E| = 100000$)", fontsize=12)
+    plt.savefig("bfs_plots/bfs_random_graph_runtimes.png", dpi=500)
+    plt.show()
+
+def plot_speedup_random(prefix):
+    ts = np.arange(1,9)
+    avg_top_down_seq_runtimes = list()
+    avg_top_down_par_runtimes = list()
+    avg_bottom_up_seq_runtimes = list()
+    avg_bottom_up_par_runtimes = list()
+    avg_hybrid_par_runtimes = list()
+    for t in ts:
+        avg_top_down_seq_runtime, avg_top_down_par_runtime, avg_bottom_up_seq_runtime, avg_bottom_up_par_runtime, avg_hybrid_par_runtime = read_out(os.path.join(prefix, "bfs_random_graph_" + str(t) + ".txt"))
+        avg_top_down_seq_runtimes.append(avg_top_down_seq_runtime)
+        avg_top_down_par_runtimes.append(avg_top_down_par_runtime)
+        avg_bottom_up_seq_runtimes.append(avg_bottom_up_seq_runtime)
+        avg_bottom_up_par_runtimes.append(avg_bottom_up_par_runtime)
+        avg_hybrid_par_runtimes.append(avg_hybrid_par_runtime)
+    avg_top_down_speedup = [avg_top_down_seq_runtimes[i]/avg_top_down_par_runtimes[i] for i in range(len(ts))]
+    avg_bottom_up_speedup = [avg_top_down_seq_runtimes[i]/avg_bottom_up_par_runtimes[i] for i in range(len(ts))]
+    avg_hybrid_speedup = [avg_top_down_seq_runtimes[i]/avg_hybrid_par_runtimes[i] for i in range(len(ts))]
+    plt.plot(ts, avg_top_down_speedup)
+    plt.plot(ts, avg_bottom_up_speedup)
+    plt.plot(ts, avg_hybrid_speedup)
+    plt.plot(ts, [1 for _ in range(8)], alpha=0.5)
+    plt.xlabel("Number of Threads")
+    plt.ylabel("Speedup")
+    plt.title("BFS Speedup on Random Graphs ($|V| = 20000$, $|E| = 100000$)", fontsize=12)
+    plt.legend(["Top Down", "Bottom Up", "Direction Optimizing", "Baseline"])
+    plt.savefig("bfs_plots/bfs_random_speedup.png", dpi=500)
+    plt.show()
+
 
 prefix = "../results/bfs/"
 # plot_runtimes_internet(prefix)
 # plot_runtimes_powerlaw(prefix)
 # plot_runtimes_powerlaw2(prefix)
+plot_runtimes_random(prefix)
 
-plot_speedup_powerlaw(prefix)
+# plot_speedup_powerlaw(prefix)
+plot_speedup_random(prefix)

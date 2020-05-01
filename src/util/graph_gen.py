@@ -139,4 +139,4 @@ if __name__ == "__main__":
         # export_powerlaw_cluster_graph(20000, 5, 0.25)
         # export_erdos_renyi_graph(20000, 0.25)
         # export_random_graph(20000, 40000)
-        export_random_graph_batch(20000, 40000, 50, "../graphs/random_graph/20000_40000/")
+        export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
