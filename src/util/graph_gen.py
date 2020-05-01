@@ -116,6 +116,12 @@ def export_watts_strogatz_graph(n, k, p, prefix):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_barabasi_albert_graph(n, m, prefix):
+    G = nx.barabasi_albert_graph(n, m)
+    gname = prefix + "barabasi_albert_%d_%d" % (n, m)
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -143,29 +149,5 @@ if __name__ == "__main__":
         # export_erdos_renyi_graph(20000, 0.25)
         # export_random_graph(20000, 40000)
         # export_random_graph_batch(20000, 100000, 50, "../graphs/random_graph/20000_40000/")
-        export_watts_strogatz_graph(20000, 20, 0.25, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 50, 0.25, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 100, 0.25, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 200, 0.25, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(50000, 20, 0.25, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 50, 0.25, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 100, 0.25, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 500, 0.25, "../graphs/watts_strogatz/50000/")
-
-        export_watts_strogatz_graph(20000, 20, 0.25, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 50, 0.50, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 100, 0.50, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 200, 0.50, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(50000, 20, 0.50, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 50, 0.50, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 100, 0.50, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 500, 0.50, "../graphs/watts_strogatz/50000/")
-
-        export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 50, 0.1, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 100, 0.1, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(20000, 200, 0.1, "../graphs/watts_strogatz/20000/")
-        export_watts_strogatz_graph(50000, 20, 0.1, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 50, 0.1, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 100, 0.1, "../graphs/watts_strogatz/50000/")
-        export_watts_strogatz_graph(50000, 500, 0.1, "../graphs/watts_strogatz/50000/")
+        # export_watts_strogatz_graph(20000, 20, 0.1, "../graphs/watts_strogatz/20000/")
+        export_barabasi_albert_graph(20000, 20, "../graphs/barabasi_albert/20000/")
