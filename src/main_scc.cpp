@@ -18,13 +18,15 @@
 #include "scc/scc_seq.cpp"
 #include "scc/scc_par.cpp"
 #include "scc/scc_hybrid.cpp"
+#include "le_lists/le_lists_seq.cpp"
+#include "le_lists/le_lists_par.cpp"
 
 /*
  * Populate g from the given input file.
  *     graph_in - input filename
  *     g - graph
  */
-void inline load_graph(std::string graph_in, Graph &g) {
+Graph load_graph(std::string graph_in) {
     int n, m;
     std::ifstream source;
     source.open(graph_in);
@@ -35,10 +37,7 @@ void inline load_graph(std::string graph_in, Graph &g) {
     iss >> n >> m;
     std::vector<std::vector<int>> in_mapper(n + 1, std::vector<int>{});
     // populating the out-neighbor portion of the graph
-    g->out_offsets   = (int *) calloc(n + 1, sizeof(int));
-    g->out_edge_list = (int *) calloc(2*m,   sizeof(int));
-    g->n = n;
-    g->m = m;
+    Graph g = alloc_graph(n, m);
     int v   = -1;
     int off = 0;
     int pos = 0;
@@ -57,12 +56,10 @@ void inline load_graph(std::string graph_in, Graph &g) {
     g->out_offsets[n] = num_edges_stored;
 
     // populating the in-neighbor portion of the graph
-    g->in_offsets   = (int *) calloc(n + 1, sizeof(int));
-    g->in_edge_list = (int *) calloc(2*m,   sizeof(int));
     off = 0;
     pos = 0;
     // for each vertex->in_neighbor pair
-    for (int vtx = 0; vtx < in_mapper.size(); ++vtx) {
+    for (size_t vtx = 0; vtx < in_mapper.size(); ++vtx) {
         g->in_offsets[off++] = pos;
         // for each in-neighbor of the current vertex
         for (auto &in_nbor : in_mapper[vtx]) {
@@ -72,10 +69,10 @@ void inline load_graph(std::string graph_in, Graph &g) {
     g->in_offsets[n] = num_edges_stored;
     source.close();
     std::cout << "Succesfully Loaded Graph" << std::endl;
-
+    return g;
 }
 
-void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_top_down_seq_wrapper(Graph g, std::string out_filename) {
     std::cout << "Top Down BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -96,7 +93,7 @@ void inline bfs_top_down_seq_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_top_down_par_wrapper(Graph g, std::string out_filename) {
     std::cout << "Top Down BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -117,7 +114,7 @@ void inline bfs_top_down_par_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_bottom_up_seq_wrapper(Graph g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Sequential)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -138,7 +135,7 @@ void inline bfs_bottom_up_seq_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_bottom_up_par_wrapper(Graph g, std::string out_filename) {
     std::cout << "Bottom Up BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -159,7 +156,7 @@ void inline bfs_bottom_up_par_wrapper(Graph &g, std::string out_filename) {
     free(distances);
 }
 
-void inline bfs_hybrid_wrapper(Graph &g, std::string out_filename) {
+void inline bfs_hybrid_wrapper(Graph g, std::string out_filename) {
     std::cout << "Hybrid BFS (Parallel)" << std::endl;
     int *distances = (int *) calloc(g->n, sizeof(int));
     std::unordered_map<std::string, double> metrics;
@@ -229,7 +226,7 @@ void inline ball_decomp_hybrid_wrapper(Graph g, float beta, std::string out_file
     outfile << std::to_string(runtime) << "\n";
 }
 
-void inline bfs_correctness_wrapper(Graph &g) {
+void inline bfs_correctness_wrapper(Graph g) {
     int n = g->n;
     int *distances_ref = (int *) calloc(n, sizeof(int));
     int *distances_test = (int *) calloc(n, sizeof(int));
@@ -276,49 +273,101 @@ void inline scc_hybrid_wrapper(Graph &g) {
     compute_scc_hybrid(all_scc, g);
 }
 
+void inline le_lists_seq_wrapper(Graph g) {
+    std::cout << "LE-Lists (Seq)" << std::endl;
+    std::vector<std::vector<int>> L_v;
+    std::vector<std::vector<int>> L_d;
+    std::unordered_map<std::string, double> metrics;
+    double runtime = std::numeric_limits<double>::max();
+    for (int i = 0; i < 3; ++i) {
+        le_lists_seq(g, L_v, L_d, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
+
+
+
+    // for (int vid = 0; vid < g->n; ++vid) {
+    //     std::cout << "LE-List for vertex " << vid << std::endl;
+    //     std::vector<int> L_vid_v = L_v[vid];
+    //     std::vector<int> L_vid_d = L_d[vid];
+    //     for (int j = 0; j < L_vid_v.size(); ++j) {
+    //         int nid = L_vid_v[j];
+    //         std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+    //     }
+    //     std::cout << "\n";
+    // }
+
+    std::cout << std::to_string(runtime) << std::endl;
+
+}
+
+void inline le_lists_par_wrapper(Graph g) {
+    std::cout << "LE-Lists (Par)" << std::endl;
+    std::vector<std::vector<int>> L_v;
+    std::vector<std::vector<int>> L_d;
+    std::unordered_map<std::string, double> metrics;
+    double runtime = std::numeric_limits<double>::max();
+    for (int i = 0; i < 3; ++i) {
+        le_lists_par(g, L_v, L_d, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
+
+
+
+    // for (int vid = 0; vid < g->n; ++vid) {
+    //     std::cout << "LE-List for vertex " << vid << std::endl;
+    //     std::vector<int> L_vid_v = L_v[vid];
+    //     std::vector<int> L_vid_d = L_d[vid];
+    //     for (int j = 0; j < L_vid_v.size(); ++j) {
+    //         int nid = L_vid_v[j];
+    //         std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+    //     }
+    //     std::cout << "\n";
+    // }
+
+    std::cout << std::to_string(runtime) << std::endl;
+
+}
+
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
-    Graph g = (graph_t *) malloc(sizeof(graph_t));
-    load_graph(graph_in, g);
+    Graph g = load_graph(graph_in);
 
-    // int num_threads = 8;
-    // omp_set_num_threads(num_threads);
-    // std::cout << "Number of Threads: " << num_threads << std::endl;
+    int num_threads = 8;
+    omp_set_num_threads(num_threads);
+    std::cout << "Number of Threads: " << num_threads << std::endl;
+
+
 
     // ball_decomp_seq_wrapper(g, 0.25);
     // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
-    // bfs_top_down_seq_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_top_down_par_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_bottom_up_seq_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_bottom_up_par_wrapper(g, "results/bfs/bfs.txt");
-    // bfs_hybrid_wrapper(g, "results/bfs/bfs.txt");
 
-    // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
-    //     std::string num_threads_str = std::to_string(num_threads);
-    //     omp_set_num_threads(num_threads);
-    //     std::cout << "Number of Threads: " << num_threads << std::endl;
-    //     std::string out_filename = "results/bfs/bfs_powerlaw2_" + num_threads_str + ".txt";
-    //     bfs_top_down_seq_wrapper(g, out_filename);
-    //     #pragma omp barrier
-    //     bfs_top_down_par_wrapper(g, out_filename);
-    //     #pragma omp barrier
-    //     bfs_bottom_up_seq_wrapper(g, out_filename);
-    //     #pragma omp barrier
-    //     bfs_bottom_up_par_wrapper(g, out_filename);
-    //     #pragma omp barrier
-    //     bfs_hybrid_wrapper(g, out_filename);
-    //     #pragma omp barrier
-    // }
+    for (int num_threads = 1; num_threads <= 8; ++num_threads) {
+        std::string num_threads_str = std::to_string(num_threads);
+        omp_set_num_threads(num_threads);
+        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~Number of Threads: " << num_threads << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+        scc_seq_wrapper(g, 0);
+        #pragma omp barrier
+        scc_seq_wrapper(g, 1);
+        #pragma omp barrier
+        scc_par_wrapper(g, 0);
+        #pragma omp barrier
+        scc_par_wrapper(g, 1);
+        #pragma omp barrier
+        scc_hybrid_wrapper(g);
+        #pragma omp barrier
+    }
 
     // bfs_correctness_wrapper(g);
+    // le_lists_seq_wrapper(g);
+    // le_lists_par_wrapper(g);
 
-    scc_seq_wrapper(g, 0);
-    scc_seq_wrapper(g, 1);
-    scc_par_wrapper(g, 0);
-    scc_par_wrapper(g, 1);
-    scc_hybrid_wrapper(g);
     free(g);
 
     return 0;
