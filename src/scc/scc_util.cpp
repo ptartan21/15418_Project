@@ -16,37 +16,54 @@ void deep_copy(int *src, int *dest, int n) {
 }
 
 // computes the set union of S1 and S2
-std::unordered_set<int> set_u(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
-    std::unordered_set<int> res;
-    for (auto &v : S1) { res.insert(v); }
-    for (auto &v : S2) { res.insert(v); }
-    return res;
+void set_u(unsigned char *S1, unsigned char *S2, unsigned char *res, int n) {
+    for (int i = 0; i < n; ++i) {
+        res[i] = S1[i] | S2[i];
+    }
 }
 
 // computes the set intersection of S1 and S2
-std::unordered_set<int> set_i(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
-    if (S1.size() > S2.size()) {
-        return set_i(S2, S1);
+void set_i(unsigned char *S1, unsigned char *S2, unsigned char *res, int n) {
+    for (int i = 0; i < n; ++i) {
+        res[i] = S1[i] & S2[i];
     }
-    std::unordered_set<int> intersect;
-    for (auto &v : S1) {
-        if (S2.count(v)) {
-            intersect.insert(v);
-        }
-    }
-    return intersect;
 }
 
 // computes the set difference S1 - S2
-std::unordered_set<int> set_d(std::unordered_set<int> &S1, std::unordered_set<int> &S2) {
-    std::unordered_set<int> diff;
-    for (auto &v : S1) {
-        if (!S2.count(v)) {
-            diff.insert(v);
+void set_d(unsigned char *S1, unsigned char *S2, unsigned char *res, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (!S1[i] || (S1[i] && S2[i])) {
+            res[i] = 0;
+        } else {
+            res[i] = 1;
         }
     }
-    return diff;
 }
+
+// // computes the set union of S1 and S2
+// void set_u_par(unsigned char *S1, unsigned char *S2, unsigned char *res, int n) {
+//     for (int i = 0; i < n; ++i) {
+//         res[i] = S1[i] | S2[i];
+//     }
+// }
+
+// // computes the set intersection of S1 and S2
+// void set_i_par(unsigned char *S1, unsigned char *S2, unsigned char *res) {
+//     for (int i = 0; i < n; ++i) {
+//         res[i] = S1[i] & S2[i];
+//     }
+// }
+
+// // computes the set difference S1 - S2
+// void set_d_par(unsigned char *S1, unsigned char *S2, unsigned char *res) {
+//     for (int i = 0; i < n; ++i) {
+//         if (!S1[i] || (S1[i] && S2[i])) {
+//             res[i] = 0;
+//         } else {
+//             res[i] = 1;
+//         }
+//     }
+// }
 
 // Constructing the reverse graph (flipping the direction of each edge) of g
 Graph reverse_graph(Graph g) {
@@ -68,12 +85,13 @@ Graph reverse_graph(Graph g) {
  *     next_frontier - next frontier
  *     distances     - distance from source
  */
-void construct_frontier_top_down(Graph &g, std::unordered_set<int> &S, vertex_set *frontier, vertex_set *next_frontier, std::vector<int> &distances) {
+void construct_frontier_top_down(Graph &g, unsigned char *S, unsigned char *reach, vertex_set *frontier, vertex_set *next_frontier, std::vector<int> &distances) {
     for (int i = 0; i < frontier->num_vertices; ++i) {
         int vid = frontier->vertices[i];
         for (int eid = g->out_offsets[vid]; eid < g->out_offsets[vid + 1]; ++eid) {
             int nid = g->out_edge_list[eid];
-            if (S.count(nid) && distances[nid] == UNVISITED) {
+            if (S[nid] && distances[nid] == UNVISITED) {
+                reach[nid] = 1;
                 distances[nid] = distances[vid] + 1;
                 next_frontier->vertices[next_frontier->num_vertices++] = nid;
             }
@@ -90,13 +108,14 @@ void construct_frontier_top_down(Graph &g, std::unordered_set<int> &S, vertex_se
  *     iter          - distance of vertices added to frontier from source
  *     distances     - distance from source
  */
-void construct_frontier_bottom_up(Graph &g, std::unordered_set<int> &S, int &frontier_size, int iter, std::vector<int> &distances) {
+void construct_frontier_bottom_up(Graph &g, unsigned char *S, unsigned char *reach, int &frontier_size, int iter, std::vector<int> &distances) {
     frontier_size = 0;
     for (int vid = 0; vid < g->n; ++vid) {
-        if (S.count(vid) && distances[vid] == UNVISITED) {
+        if (S[vid] && distances[vid] == UNVISITED) {
             for (int eid = g->in_offsets[vid]; eid <g->in_offsets[vid + 1]; ++eid) {
                 int nid = g->in_edge_list[eid];
                 if (distances[nid] == iter - 1) {
+                    reach[vid] = 1;
                     distances[vid] = iter;
                     frontier_size += 1;
                     break;
@@ -115,7 +134,7 @@ void construct_frontier_bottom_up(Graph &g, std::unordered_set<int> &S, int &fro
  * Output
  *     reach  - set of vertices visited
  */
-std::unordered_set<int> bfs_top_down_seq(Graph &g, std::unordered_set<int> &S, int source) {
+void bfs_top_down_seq(Graph &g, unsigned char *S, unsigned char *reach, int source) {
     vertex_set *frontier      = (vertex_set *) malloc(sizeof(vertex_set));
     vertex_set *next_frontier = (vertex_set *) malloc(sizeof(vertex_set));
     init_vertex_set(frontier, g->n);
@@ -125,18 +144,11 @@ std::unordered_set<int> bfs_top_down_seq(Graph &g, std::unordered_set<int> &S, i
     distances[source] = 0;
     while (frontier->num_vertices > 0) {
         reset_frontier(next_frontier);
-        construct_frontier_top_down(g, S, frontier, next_frontier, distances);
+        construct_frontier_top_down(g, S, reach, frontier, next_frontier, distances);
         advance_frontier(frontier, next_frontier);
-    }
-    std::unordered_set<int> reach;
-    for (int vid = 0; vid < g->n; ++vid) {
-        if (distances[vid] != UNVISITED) {
-            reach.insert(vid);
-        }
     }
     free_vertex_set(frontier);
     free_vertex_set(next_frontier);
-    return reach;
 }
 
 /*
@@ -148,22 +160,15 @@ std::unordered_set<int> bfs_top_down_seq(Graph &g, std::unordered_set<int> &S, i
  * Output
  *     reach  - set of vertices visited
  */
-std::unordered_set<int> bfs_bottom_up_seq(Graph &g, std::unordered_set<int> &S, int source) {
+void bfs_bottom_up_seq(Graph &g, unsigned char *S, unsigned char *reach, int source) {
     int iter          = 1;
     int frontier_size = 1;
     std::vector<int> distances(g->n, UNVISITED);
     distances[source] = 0;
     while (frontier_size > 0) {
-        construct_frontier_bottom_up(g, S, frontier_size, iter, distances);
+        construct_frontier_bottom_up(g, S, reach, frontier_size, iter, distances);
         ++iter;
     }
-    std::unordered_set<int> reach;
-    for (int vid = 0; vid < g->n; ++vid) {
-        if (distances[vid] != UNVISITED) {
-            reach.insert(vid);
-        }
-    }
-    return reach;
 }
 
 /***** PARALLEL *****/
