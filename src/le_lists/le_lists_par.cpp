@@ -79,7 +79,7 @@ void inline le_lists_bfs_bottom_up_step(Graph g, int &frontier_size, int iter, i
     frontier_size = shared_frontier_size;
 }
 
-void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S, int *distances, unsigned char *in_S, int mode) {
+void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S, int *distances, unsigned char *in_S) {
     double alpha = 2.0;
     double gamma = 10.0;
     
@@ -151,7 +151,7 @@ void inline le_lists_bfs_hybrid(Graph g, int source, int *deltas, vertex_set* S,
     free_vertex_set(next_frontier);
 }
 
-void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::vector<int>> &L_d, int mode,
+void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::vector<int>> &L_d,
     std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
 
@@ -172,7 +172,7 @@ void le_lists_par(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
     {
         for (int vid = 0; vid < g->n; ++vid) {
             #pragma omp single
-            le_lists_bfs_hybrid(g, vid, deltas, S, distances, in_S, mode);
+            le_lists_bfs_hybrid(g, vid, deltas, S, distances, in_S);
             {
                 // For bottom-up
                 //     #pragma omp for schedule(static) nowait
