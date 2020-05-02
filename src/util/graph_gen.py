@@ -136,6 +136,12 @@ def export_random_k_out_graph(n, k, alpha, prefix):
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
+def export_random_tree(n, prefix):
+    G = nx.random_tree(n)
+    gname = prefix + "random_tree_%d" % n
+    export_graph(G, gname + ".txt")
+    return G, gname + ".png"
+
 if __name__ == "__main__":
     if (len(sys.argv) == 3):
         n = int(sys.argv[1])
@@ -168,3 +174,5 @@ if __name__ == "__main__":
         # export_scale_free_graph(10000, "../graphs/scale_free/")
         # export_scale_free_graph(2000, "../graphs/scale_free/")
         # export_random_k_out_graph(2000, 20, 0.1, "../graphs/random_k_out/")
+        export_random_tree(100000, "../graphs/random_tree/")
+        
