@@ -3,8 +3,6 @@
 
 #include <limits>
 
-
-
 void inline le_lists_bfs_top_down_step(Graph g, vertex_set *frontier, vertex_set *next_frontier, 
     int *distances, int &num_frontier_edges, int &num_edges_checked, int *deltas, vertex_set *S, int iter) {
     #pragma omp parallel 

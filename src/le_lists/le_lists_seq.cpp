@@ -29,13 +29,12 @@ void inline le_lists_bfs_seq(Graph g, int source, std::vector<int> deltas,
     }
 }
 
-void le_lists_seq(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::vector<int>> & L_d,
+void le_lists_seq(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::vector<int>> &L_d,
     std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
     std::vector<int> deltas = std::vector<int>(g->n,std::numeric_limits<int>::max());
     L_v = std::vector<std::vector<int>>(g->n, std::vector<int>()); // v_i's
     L_d = std::vector<std::vector<int>>(g->n, std::vector<int>()); // d(v_i, u)'s
-    int total_S_size = 0;
     for (int vid = 0; vid < g->n; ++vid) {
         std::vector<int> S;
         std::vector<int> distances = std::vector<int>(g->n, UNVISITED);

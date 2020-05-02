@@ -20,6 +20,7 @@
 #include "scc/scc_hybrid.cpp"
 #include "le_lists/le_lists_seq.cpp"
 #include "le_lists/le_lists_par.cpp"
+#include "le_lists/le_lists_par2.cpp"
 
 /*
  * Populate g from the given input file.
@@ -177,11 +178,25 @@ void inline bfs_hybrid_wrapper(Graph g, std::string out_filename) {
     free(distances);
 }
 
-void inline ball_decomp_seq_wrapper(Graph g, float beta) {
+void inline ball_decomp_seq_wrapper(Graph g, float beta, std::string out_filename) {
     std::cout << "Ball Decomposition with beta = " << std::setprecision(2) << beta << " (Sequential)" << std::endl;
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
-    ball_decomp_seq(g, beta, collection, radii);
+    std::unordered_map<std::string, double> metrics;
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        ball_decomp_seq(g, beta, collection, radii, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
+
+    // Write metrics to outfile
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
+    std::cout << std::to_string(runtime) << std::endl;
 }
 
 void inline ball_decomp_bottom_up_par_wrapper(Graph g, float beta, std::string out_filename) {
@@ -189,13 +204,20 @@ void inline ball_decomp_bottom_up_par_wrapper(Graph g, float beta, std::string o
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
-    ball_decomp_bottom_up_par(g, beta, collection, radii, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        ball_decomp_bottom_up_par(g, beta, collection, radii, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
-    outfile << std::to_string(runtime) << " ";
+    outfile << std::to_string(runtime) << "\n";
+    std::cout << std::to_string(runtime) << std::endl;
 }
 
 void inline ball_decomp_top_down_par_wrapper(Graph g, float beta, std::string out_filename) {
@@ -203,13 +225,20 @@ void inline ball_decomp_top_down_par_wrapper(Graph g, float beta, std::string ou
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
-    ball_decomp_top_down_par(g, beta, collection, radii, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        ball_decomp_top_down_par(g, beta, collection, radii, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << " ";
+    std::cout << std::to_string(runtime) << std::endl;
 }
 
 void inline ball_decomp_hybrid_wrapper(Graph g, float beta, std::string out_filename) {
@@ -217,13 +246,20 @@ void inline ball_decomp_hybrid_wrapper(Graph g, float beta, std::string out_file
     std::vector<std::unordered_set<int>> collection;
     std::vector<int> radii;
     std::unordered_map<std::string, double> metrics;
-    ball_decomp_hybrid(g, beta, collection, radii, metrics);
+    double runtime = std::numeric_limits<double>::max();
+    // Run 3 times and take min runtime
+    for (int i = 0; i < 3; ++i) {
+        ball_decomp_hybrid(g, beta, collection, radii, metrics);
+        #pragma omp barrier
+        runtime = std::min(runtime, metrics.find("runtime")->second);
+        metrics.clear();
+    }
 
     // Write metrics to outfile
-    double runtime = metrics.find("runtime")->second;
     std::ofstream outfile;
     outfile.open(out_filename, std::ios_base::app);
     outfile << std::to_string(runtime) << "\n";
+    std::cout << std::to_string(runtime) << std::endl;
 }
 
 void inline bfs_correctness_wrapper(Graph g) {
@@ -273,7 +309,7 @@ void inline scc_hybrid_wrapper(Graph &g) {
     compute_scc_hybrid(all_scc, g);
 }
 
-void inline le_lists_seq_wrapper(Graph g) {
+void inline le_lists_seq_wrapper(Graph g, std::string out_filename) {
     std::cout << "LE-Lists (Seq)" << std::endl;
     std::vector<std::vector<int>> L_v;
     std::vector<std::vector<int>> L_d;
@@ -286,7 +322,10 @@ void inline le_lists_seq_wrapper(Graph g) {
         metrics.clear();
     }
 
-
+    // Write metrics to outfile
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << " ";
 
     // for (int vid = 0; vid < g->n; ++vid) {
     //     std::cout << "LE-List for vertex " << vid << std::endl;
@@ -303,78 +342,99 @@ void inline le_lists_seq_wrapper(Graph g) {
 
 }
 
-void inline le_lists_par_wrapper(Graph g) {
+void inline le_lists_par_wrapper(Graph g, std::string out_filename) {
     std::cout << "LE-Lists (Par)" << std::endl;
-    std::vector<std::vector<int>> L_v;
-    std::vector<std::vector<int>> L_d;
+    std::vector<std::vector<std::pair<int, int>>> L;
     std::unordered_map<std::string, double> metrics;
     double runtime = std::numeric_limits<double>::max();
     for (int i = 0; i < 3; ++i) {
-        le_lists_par(g, L_v, L_d, metrics);
-        #pragma omp barrier
+        le_lists_par2(g, L, metrics);
         runtime = std::min(runtime, metrics.find("runtime")->second);
         metrics.clear();
     }
 
-
+    // Write metrics to outfile
+    std::ofstream outfile;
+    outfile.open(out_filename, std::ios_base::app);
+    outfile << std::to_string(runtime) << "\n";
+    
+    std::cout << std::to_string(runtime) << std::endl;
+    
 
     // for (int vid = 0; vid < g->n; ++vid) {
     //     std::cout << "LE-List for vertex " << vid << std::endl;
-    //     std::vector<int> L_vid_v = L_v[vid];
-    //     std::vector<int> L_vid_d = L_d[vid];
-    //     for (int j = 0; j < L_vid_v.size(); ++j) {
-    //         int nid = L_vid_v[j];
-    //         std::cout << "vertex: " << nid << ", distance: " << L_vid_d[j] << "    ";
+    //     std::vector<std::pair<int, int>> L_vid = L[vid];
+    //     for (int j = 0; j < L_vid.size(); ++j) {
+    //         std::cout << "vertex: " << L_vid[j].first << ", distance: " << L_vid[j].second << "    ";
     //     }
     //     std::cout << "\n";
     // }
-
-    std::cout << std::to_string(runtime) << std::endl;
-
 }
 
 int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = load_graph(graph_in);
 
-    int num_threads = 8;
-    omp_set_num_threads(num_threads);
-    std::cout << "Number of Threads: " << num_threads << std::endl;
-
-    
-
     // ball_decomp_seq_wrapper(g, 0.25);
     // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
 
-    for (int num_threads = 1; num_threads <= 8; ++num_threads) {
-        std::string num_threads_str = std::to_string(num_threads);
-        omp_set_num_threads(num_threads);
-        std::cout << "Number of Threads: " << num_threads << std::endl;
-        std::string out_filename = "results/bfs/bfs_random_graph_" + num_threads_str + ".txt";
-        bfs_top_down_seq_wrapper(g, out_filename);
-        #pragma omp barrier
-        bfs_top_down_par_wrapper(g, out_filename);
-        #pragma omp barrier
-        bfs_bottom_up_seq_wrapper(g, out_filename);
-        #pragma omp barrier
-        bfs_bottom_up_par_wrapper(g, out_filename);
-        #pragma omp barrier
-        bfs_hybrid_wrapper(g, out_filename);
-        #pragma omp barrier
-    }
+    // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
+    //     std::string num_threads_str = std::to_string(num_threads);
+    //     omp_set_num_threads(num_threads);
+    //     std::cout << "Number of Threads: " << num_threads << std::endl;
+    //     std::string out_filename = "results/bfs/bfs_powerlaw2_" + num_threads_str + ".txt";
+    //     #pragma omp barrier
+    //     bfs_top_down_seq_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_top_down_par_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_bottom_up_seq_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_bottom_up_par_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    //     bfs_hybrid_wrapper(g, out_filename);
+    //     #pragma omp barrier
+    // }
+
+    // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
+    //     std::string num_threads_str = std::to_string(num_threads);
+    //     omp_set_num_threads(num_threads);
+    //     std::cout << "Number of Threads: " << num_threads << std::endl;
+    //     std::string out_filename = "results/bg/bg_random_" + num_threads_str + ".txt";
+    //     double beta = 0.5;
+    //     #pragma omp barrier
+    //     ball_decomp_seq_wrapper(g, beta, out_filename);
+        // ball_decomp_top_down_par_wrapper(g, beta, out_filename);
+
+        // ball_decomp_bottom_up_par_wrapper(g, beta, out_filename);
+        // ball_decomp_hybrid_wrapper(g, beta, out_filename);
+    // }
+
+
+    // for (int num_threads = 1; num_threads <= 8; ++num_threads) {
+    //     std::string num_threads_str = std::to_string(num_threads);
+    //     omp_set_num_threads(num_threads);
+    //     std::cout << "Number of Threads: " << num_threads << std::endl;
+    //     std::string out_filename = "results/le_lists/le_lists_powerlaw2_" + num_threads_str + ".txt";
+        
+    //     le_lists_seq_wrapper(g, out_filename);
+    //     le_lists_par_wrapper(g, out_filename);
+    // }
 
     // bfs_correctness_wrapper(g);
 
-    scc_seq_wrapper(g, 0);
-    scc_seq_wrapper(g, 1);
-    scc_par_wrapper(g, 0);
-    scc_par_wrapper(g, 1);
-    scc_hybrid_wrapper(g);
+    // scc_seq_wrapper(g, 0);
+    // scc_seq_wrapper(g, 1);
+    // scc_par_wrapper(g, 0);
+    // scc_par_wrapper(g, 1);
+    // scc_hybrid_wrapper(g);
 
-    // le_lists_seq_wrapper(g);
-    // le_lists_par_wrapper(g);
+    omp_set_num_threads(8);
+
+    le_lists_seq_wrapper(g, "results/le_lists/le_lists_test.txt");
+    le_lists_par_wrapper(g, "results/le_lists/le_lists_test.txt");
 
     free(g);
 

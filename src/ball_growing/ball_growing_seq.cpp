@@ -179,7 +179,7 @@ void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     // std::cout << "Num Balls: " << collection.size() << std::endl;
-    // std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, collection) << std::endl;
+    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, collection) << std::endl;
 
     double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
     metrics.insert(std::make_pair("runtime", runtime));
