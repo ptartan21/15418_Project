@@ -122,8 +122,8 @@ void ball_decomp_bottom_up_par(Graph g, double beta, std::vector<std::unordered_
 
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << "Iterations: " << iter << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     // std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
 
     double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
@@ -241,8 +241,8 @@ void ball_decomp_top_down_par(Graph g, double beta, std::vector<std::unordered_s
     auto end_time = std::chrono::steady_clock::now();
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     // std::cout << "Iterations: " << iter << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << " ns" << std::endl;
+    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
     // std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, ball_ids) << std::endl;
     
     double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();

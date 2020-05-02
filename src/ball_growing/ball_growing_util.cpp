@@ -14,7 +14,7 @@ void inline compute_deltas(double *&deltas, double beta, int n) {
     std::default_random_engine generator(418);
     std::exponential_distribution<double> distribution(beta);
     double max_delta = -1.0;
-    omp_set_num_threads(1);
+    // omp_set_num_threads(1);
     #pragma omp parallel
     {
         #pragma omp for reduction(max:max_delta) schedule(static)
@@ -29,7 +29,7 @@ void inline compute_deltas(double *&deltas, double beta, int n) {
             deltas[i] = max_delta - deltas[i];
         }
     }
-    omp_set_num_threads(8);
+    // omp_set_num_threads(8);
 }
 
 /*

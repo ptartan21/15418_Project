@@ -163,7 +163,7 @@ void grow_ball(Graph g, int source, float beta, std::vector<bool> &present, std:
  *     collection - output; collection of balls
  *     radii - output; radii of the balls
  */
-void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &collection, std::vector<int> &radii) {
+void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &collection, std::vector<int> &radii, std::unordered_map<std::string, double> &metrics) {
     auto start_time = std::chrono::steady_clock::now();
     std::vector<bool> present(g->n, true);
     std::unordered_set<int> ball;
@@ -177,7 +177,10 @@ void ball_decomp_seq(Graph g, float beta, std::vector<std::unordered_set<int>> &
         }
     }
     auto end_time = std::chrono::steady_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
-    std::cout << "Num Balls: " << collection.size() << std::endl;
-    std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, collection) << std::endl;
+    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
+    // std::cout << "Num Balls: " << collection.size() << std::endl;
+    // std::cout << "Fraction of Intercluster Edges: " << get_frac_intercluster_edges(g, collection) << std::endl;
+
+    double runtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+    metrics.insert(std::make_pair("runtime", runtime));
 }
