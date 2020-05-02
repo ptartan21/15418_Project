@@ -245,7 +245,7 @@ void inline bfs_correctness_wrapper(Graph g) {
 
 // 0 == bottom up seq, 1 == top down seq
 void inline scc_seq_wrapper(Graph &g, int method) {
-    std::vector<std::unordered_set<int>> all_scc;
+    std::vector<unsigned char *> all_scc;
     if (method == 0) {
         std::cout << "SCC Bottom Up BFS (Sequential)" << std::endl;
         compute_scc_seq(all_scc, g, 0);
@@ -257,7 +257,7 @@ void inline scc_seq_wrapper(Graph &g, int method) {
 
 // 0 == bottom up seq, 1 == top down seq
 void inline scc_par_wrapper(Graph &g, int method) {
-    std::vector<std::unordered_set<int>> all_scc;
+    std::vector<unsigned char*> all_scc;
     if (method == 0) {
         std::cout << "SCC Bottom Up BFS (Parallel)" << std::endl;
         compute_scc_par(all_scc, g, 0);
@@ -268,7 +268,7 @@ void inline scc_par_wrapper(Graph &g, int method) {
 }
 
 void inline scc_hybrid_wrapper(Graph &g) {
-    std::vector<std::unordered_set<int>> all_scc;
+    std::vector<unsigned char*> all_scc;
     std::cout << "SCC Hybrid BFS" << std::endl;
     compute_scc_hybrid(all_scc, g);
 }
@@ -337,17 +337,16 @@ int main(int argc, char **argv) {
     std::string graph_in(argv[1]);
     Graph g = load_graph(graph_in);
 
-    int num_threads = 8;
-    omp_set_num_threads(num_threads);
-    std::cout << "Number of Threads: " << num_threads << std::endl;
-
-
+    // int num_threads = 8;
+    // omp_set_num_threads(num_threads);
+    // std::cout << "Number of Threads: " << num_threads << std::endl;
 
     // ball_decomp_seq_wrapper(g, 0.25);
     // ball_decomp_top_down_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_bottom_up_par_wrapper(g, 0.5, "results/ball_growing/bg.txt");
     // ball_decomp_hybrid_wrapper(g, 0.5, "results/ball_growing/bg.txt");
 
+    /*
     for (int num_threads = 1; num_threads <= 8; ++num_threads) {
         std::string num_threads_str = std::to_string(num_threads);
         omp_set_num_threads(num_threads);
@@ -363,6 +362,13 @@ int main(int argc, char **argv) {
         scc_hybrid_wrapper(g);
         #pragma omp barrier
     }
+    */
+
+    // scc_seq_wrapper(g, 0);
+    // scc_seq_wrapper(g, 1);
+    scc_par_wrapper(g, 0);
+    scc_par_wrapper(g, 1);
+    scc_hybrid_wrapper(g);
 
     // bfs_correctness_wrapper(g);
     // le_lists_seq_wrapper(g);

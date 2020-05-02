@@ -124,7 +124,9 @@ def export_barabasi_albert_graph(n, m, prefix):
 
 def export_scale_free_graph(n, prefix):
     G = nx.scale_free_graph(n)
-    gname = prefix + "scale_free_%d" % (n)
+    G = nx.Graph(G) # remove parallel edges
+    G.remove_edges_from(nx.selfloop_edges(G)) # remove self-loops
+    gname = prefix + "scale_free_%d" % n
     export_graph(G, gname + ".txt")
     return G, gname + ".png"
 
