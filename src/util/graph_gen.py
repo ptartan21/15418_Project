@@ -181,5 +181,5 @@ if __name__ == "__main__":
         # export_random_k_out_graph(2000, 20, 0.1, "../graphs/random_k_out/")
         # export_random_tree(100000, "../graphs/random_tree/")
         
+        export_random_graph(6, 12, True)
         # export_gnm_dense(20,40, "../graphs/dense/")
-        export_internet_graph(6)
