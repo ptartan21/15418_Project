@@ -17,7 +17,6 @@ void inline le_lists_bfs_seq(Graph g, int source, std::vector<int> deltas,
                 int nid = g->out_edge_list[eid];
                 if (distances[nid] == UNVISITED) {
                     distances[nid] = distances[vid]+1;
-                    // next_frontier.push_back(nid);
                     if (distances[nid] < deltas[nid]) {
                         S.push_back(nid);
                         // Only need to explore S and its outgoing edges
@@ -36,6 +35,7 @@ void le_lists_seq(Graph g, std::vector<std::vector<int>> &L_v, std::vector<std::
     std::vector<int> deltas = std::vector<int>(g->n,std::numeric_limits<int>::max());
     L_v = std::vector<std::vector<int>>(g->n, std::vector<int>()); // v_i's
     L_d = std::vector<std::vector<int>>(g->n, std::vector<int>()); // d(v_i, u)'s
+    int total_S_size = 0;
     for (int vid = 0; vid < g->n; ++vid) {
         std::vector<int> S;
         std::vector<int> distances = std::vector<int>(g->n, UNVISITED);
