@@ -404,14 +404,6 @@ std::unordered_set<int> bfs_hybrid(Graph g, std::unordered_set<int> &S, int sour
                 bfs_bottom_up_step(g, S, frontier_size, iter, distances);
             }
         }
-        /*
-        std::cout << "Iteration: " << iter << std::endl;
-        if (last_step == TOP_DOWN) {
-            std::cout << "Top Down" << std::endl;
-        } else {
-            std::cout << "Bottom Up" << std::endl;
-        }
-        */
         iter++;
     }
     std::unordered_set<int> reach;
