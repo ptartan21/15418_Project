@@ -1,5 +1,6 @@
 # 15-418 Parallel Computer Architecture and Programming Final Project
-15418 Spring 2020 Project: Applications of Direction-Optimized Parallel Breadth-First Search
+15-418 Spring 2020 Project: Applications of Direction-Optimized Parallel Breadth-First Search
+
 By: Andrew Gu and Patrick Liu
 
 ## Summary
