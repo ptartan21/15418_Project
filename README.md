@@ -1,15 +1,15 @@
 # 15-418 Parallel Computer Architecture and Programming Final Project
-15418 Spring 2020 Project: Exploring Applications of Parallel Breadth-First Search in Randomized Graph Algorithms  
+15418 Spring 2020 Project: Applications of Direction-Optimized Parallel Breadth-First Search
 By: Andrew Gu and Patrick Liu
 
 ## Summary
-In this project, we implement **parallel breadth-first search** (BFS) using top-down and bottom-up strategies and explore their usage in three randomized graph algorithms:  
+In this project, we implement **parallel breadth-first search** (BFS) using top-down, bottom-up, and hybrid (direction-optimizing) strategies and explore their usage in three randomized graph algorithm tasks:  
 
-**(1)** ball growing with exponential delay for low diameter graph decomposition   
-**(2)** random incremental strongly-connected components detection  
-**(3)** random incremental least-element lists construction  
+**(1)** low diameter graph decomposition   
+**(2)** strongly-connected components detection  
+**(3)** least-element lists construction  
 
-We hope to examine the efficacy of the two BFS strategies for these algorithms, measuring speedup and profiling the runtimes for implementations in C++ with OpenMP.
+We hope to examine the efficacy of the BFS strategies for these algorithms, measuring speedup and profiling the runtimes for implementations in C++ with OpenMP.
 
 
 
